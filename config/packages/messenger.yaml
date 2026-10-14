@@ -1,0 +1,21 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        buses:
+            messenger.bus.default:
+                middleware:
+                    # The worker outlives the database connection's idle timeout.
+                    - doctrine_ping_connection
+
+        transports:
+            sync: 'sync://'
+            async: 'doctrine://default'
+            failed: 'doctrine://default'
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'
+                failed: 'in-memory://'

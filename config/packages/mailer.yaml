@@ -1,0 +1,6 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        # Default "From" applied to every message, so individual emails don't set it.
+        headers:
+            from: '%env(MAILER_FROM)%'

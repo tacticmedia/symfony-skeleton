@@ -1,0 +1,13 @@
+{# An inline text link. `quiet` inherits the surrounding colour. #}
+{% props href, kind = 'accent' %}
+
+{%- set link = html_cva(
+    variants: {
+        kind: {
+            accent: 'font-medium text-brand-yellow-700 hover:text-brand-yellow-600 dark:text-brand-yellow-400 dark:hover:text-brand-yellow-300',
+            quiet: 'hover:text-brand-yellow-700 dark:hover:text-brand-yellow-400',
+        },
+    },
+) -%}
+
+<a href="{{ href }}"{{ attributes.defaults({class: link.apply({kind})}) }}>{% block content %}{% endblock %}</a>

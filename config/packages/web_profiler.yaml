@@ -1,0 +1,14 @@
+when@dev:
+    web_profiler:
+        toolbar: true
+        excluded_ajax_paths: '(_wdt|\.well-known/mercure)'
+
+    framework:
+        profiler:
+            enabled: true
+            collect: '%kernel.debug%'
+
+when@test:
+    framework:
+        profiler:
+            collect: false

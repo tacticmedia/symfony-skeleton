@@ -1,0 +1,272 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+  workflow_dispatch: ~
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    name: QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Lint the workflows
+        run: docker run --rm --volume "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.12 -color
+      # composer.json is the single source of truth for the extension set; the Docker
+      # image the tests and e2e jobs run on carries its own equivalent list.
+      - name: Collect the required PHP extensions
+        id: php-extensions
+        run: |
+          {
+            printf 'list='
+            jq -r '[(.require // {}, .["require-dev"] // {}) | keys[]
+                    | select(startswith("ext-")) | ltrimstr("ext-")]
+                   | unique | join(", ")' composer.json
+          } >> "$GITHUB_OUTPUT"
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: ${{ steps.php-extensions.outputs.list }}
+          coverage: none
+          ini-values: memory_limit=-1
+      - name: Install dependencies
+        uses: ramsey/composer-install@v4
+        with:
+          composer-options: "--no-scripts"
+      - name: Audit dependencies
+        run: composer audit
+      # The gates are composer scripts, so `make qa-check` runs exactly these.
+      - name: Lint
+        run: composer lint
+      - name: Analyse Composer dependencies
+        run: composer dependencies
+      - name: Rector
+        run: composer rector:check
+      - name: Coding standards
+        run: composer cs:check
+      - name: Cache the PHPStan result cache
+        uses: actions/cache@v6
+        with:
+          path: var/phpstan
+          key: phpstan-${{ github.sha }}
+          restore-keys: phpstan-
+      - name: PHPStan
+        run: composer stan
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      # The Compose GitHub preinstalls fails `up --wait` on a disabled healthcheck.
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+        with:
+          version: v5.5.1
+      - name: Build Docker images
+        uses: docker/bake-action@v7
+        with:
+          pull: true
+          load: true
+          source: .
+          files: |
+            compose.yaml
+            compose.override.yaml
+          set: |
+            *.cache-from=type=gha,scope=${{github.ref}}
+            *.cache-from=type=gha,scope=refs/heads/main
+            *.cache-to=type=gha,scope=${{github.ref}},mode=max
+      - name: Cache PHP dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            vendor
+            assets/vendor
+          key: docker-vendor-${{ hashFiles('composer.lock', 'importmap.php') }}
+      - name: Start services
+        run: docker compose up --wait --no-build
+      - name: Sync dependencies and run auto-scripts
+        run: docker compose exec -T php composer install --prefer-dist --no-progress --no-interaction
+      - name: Check HTTP reachability
+        run: curl -v --fail-with-body http://localhost
+      - name: Check Mercure reachability
+        run: curl -vI --insecure --fail-with-body https://localhost/.well-known/mercure?match=test
+      - name: Build Tailwind CSS
+        run: docker compose exec -T php bin/console tailwind:build
+      - name: Create test database
+        run: docker compose exec -T php bin/console -e test doctrine:database:create --if-not-exists
+      - name: Run migrations
+        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction --all-or-nothing
+      - name: Run PHPUnit
+        run: docker compose exec -T php composer test
+      - name: Doctrine Schema Validator
+        run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+  production-image:
+    name: Production image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      # Deploys build this target; no other job does, so nothing else catches a prod-only break.
+      - name: Build the production image
+        uses: docker/build-push-action@v7
+        with:
+          # The default context is the remote git repository, not the checkout.
+          context: .
+          target: frankenphp_prod
+          cache-from: type=gha,scope=prod
+          cache-to: type=gha,scope=prod,mode=max
+  panther:
+    name: Panther journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: tests
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+        with:
+          version: v5.5.1
+      - name: Build Docker images
+        uses: docker/bake-action@v7
+        with:
+          pull: true
+          load: true
+          source: .
+          files: |
+            compose.yaml
+            compose.override.yaml
+          set: |
+            *.cache-from=type=gha,scope=${{github.ref}}
+            *.cache-from=type=gha,scope=refs/heads/main
+      - name: Cache PHP dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            vendor
+            assets/vendor
+          key: docker-vendor-${{ hashFiles('composer.lock', 'importmap.php') }}
+      - name: Start services
+        run: docker compose up --wait --no-build
+      - name: Sync dependencies and run auto-scripts
+        run: docker compose exec -T php composer install --prefer-dist --no-progress --no-interaction
+      - name: Build Tailwind CSS
+        run: docker compose exec -T php bin/console tailwind:build
+      - name: Run the Panther journeys
+        run: docker compose exec -T php-e2e composer test:panther
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p e2e-artifacts
+          docker compose cp php-e2e:/app/var/screenshots/panther e2e-artifacts/screenshots || true
+          docker compose cp php-e2e:/app/var/error-screenshots e2e-artifacts/error-screenshots || true
+      # act's artifact server rejects upload-artifact@v7 (nektos/act#6114), see docs/ci.md.
+      - name: Upload screenshots
+        if: ${{ !cancelled() && !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: panther-screenshots
+          path: e2e-artifacts
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+  playwright:
+    name: Playwright journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: tests
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+        with:
+          version: v5.5.1
+      - name: Build Docker images
+        uses: docker/bake-action@v7
+        with:
+          pull: true
+          load: true
+          source: .
+          files: |
+            compose.yaml
+            compose.override.yaml
+          set: |
+            *.cache-from=type=gha,scope=${{github.ref}}
+            *.cache-from=type=gha,scope=refs/heads/main
+      - name: Cache PHP dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            vendor
+            assets/vendor
+          key: docker-vendor-${{ hashFiles('composer.lock', 'importmap.php') }}
+      - name: Start services
+        run: docker compose up --wait --no-build
+      - name: Sync dependencies and run auto-scripts
+        run: docker compose exec -T php composer install --prefer-dist --no-progress --no-interaction
+      - name: Build Tailwind CSS
+        run: docker compose exec -T php bin/console tailwind:build
+      - name: Run the Playwright journeys
+        run: docker compose exec -T php-e2e composer test:playwright
+      - name: Collect screenshots
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p e2e-artifacts
+          docker compose cp php-e2e:/app/var/screenshots/playwright e2e-artifacts/screenshots || true
+          docker compose cp php-e2e:/app/test-failures e2e-artifacts/test-failures || true
+      # act's artifact server rejects upload-artifact@v7 (nektos/act#6114), see docs/ci.md.
+      - name: Upload screenshots
+        if: ${{ !cancelled() && !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-screenshots
+          path: e2e-artifacts
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color

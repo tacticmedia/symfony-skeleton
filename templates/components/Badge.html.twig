@@ -1,0 +1,19 @@
+{#
+    A status tag. The state belongs in the caller's data-test-id, never in asserted wording.
+#}
+{% props tone = 'neutral' %}
+
+{%- set badge = html_cva(
+    base: 'inline-flex items-center whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium',
+    variants: {
+        tone: {
+            neutral: 'bg-gray-50 text-gray-600 inset-ring inset-ring-gray-500/10 dark:bg-zinc-400/10 dark:text-gray-400 dark:inset-ring-gray-400/20',
+            success: 'bg-green-50 text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:inset-ring-green-500/20',
+            warning: 'bg-brand-yellow-50 text-brand-yellow-800 inset-ring inset-ring-brand-yellow-600/20 dark:bg-brand-yellow-400/10 dark:text-brand-yellow-500 dark:inset-ring-brand-yellow-400/20',
+            danger: 'bg-brand-red-50 text-brand-red-700 inset-ring inset-ring-brand-red-600/20 dark:bg-brand-red-500/10 dark:text-brand-red-400 dark:inset-ring-brand-red-500/20',
+            info: 'bg-sky-50 text-sky-700 inset-ring inset-ring-sky-600/20 dark:bg-sky-500/10 dark:text-sky-400 dark:inset-ring-sky-500/20',
+        },
+    },
+) -%}
+
+<span{{ attributes.defaults({class: badge.apply({tone})}) }}>{% block content %}{% endblock %}</span>

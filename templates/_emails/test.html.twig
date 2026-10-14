@@ -1,0 +1,19 @@
+{% extends '_emails/base.html.twig' %}
+
+
+{% block body %}
+    <row>
+        <columns>
+            <h1>Hi, {{ user.displayName ?? user.email }}</h1>
+            <p class="lead">This is a testing e-mail message.</p>
+            <p>{{ text }}</p>
+
+            {% if lipsum ?? true %}
+                <spacer size="16"></spacer>
+                <hr>
+                <spacer size="16"></spacer>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tristique venenatis nisi a vulputate. Nullam dapibus, libero quis laoreet molestie, augue dui semper mi, vel tempus lectus justo vitae risus. Integer blandit, augue id scelerisque rhoncus, massa ipsum vehicula odio, semper tincidunt risus metus nec justo. Suspendisse ac vulputate arcu. Aenean purus nisl, dapibus at consectetur sed, tempus a ipsum. Vivamus venenatis, orci in viverra ultricies, risus lacus vulputate enim, eleifend dictum orci nulla quis enim. Pellentesque eget neque dapibus magna ornare auctor. Duis vitae neque maximus, luctus velit ut, aliquet urna. Morbi interdum faucibus mauris, eu tempus nulla commodo eu. Aenean id dapibus orci, vel ornare purus. Duis mattis id leo id faucibus. Morbi eu ligula lacinia, ultrices risus id, sodales arcu. Vestibulum leo nisl, fermentum ac ipsum nec, feugiat sodales magna.</p>
+            {% endif %}
+        </columns>
+    </row>
+{% endblock %}

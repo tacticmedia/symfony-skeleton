@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="en">
+  <file id="messages.en">
+    <notes>
+      <note category="hint">Messages use ICU MessageFormat: keep every {placeholder} as it is, translate the text inside plural and select branches, and keep # inside plural branches, it prints the number. English labels are in Title Case; follow the capitalisation your language uses for labels.</note>
+    </notes>
+    <unit id="Fo9chqc" name="default.devTools.toggleTranslation">
+      <notes>
+        <note category="context">Home page, developer tools: switches between translated text and translation keys.</note>
+      </notes>
+      <segment>
+        <source>default.devTools.toggleTranslation</source>
+        <target>Toggle Translation</target>
+      </segment>
+    </unit>
+    <unit id="VJpSunD" name="default.devTools.toggleTurbo">
+      <notes>
+        <note category="context">Home page, developer tools: switches Turbo Drive navigation on or off.</note>
+      </notes>
+      <segment>
+        <source>default.devTools.toggleTurbo</source>
+        <target>Toggle Turbo</target>
+      </segment>
+    </unit>
+    <unit id="CTVWInX" name="default.healthCheck">
+      <notes>
+        <note category="context">Home page: link to the page that tests Mercure and e-mail delivery.</note>
+      </notes>
+      <segment>
+        <source>default.healthCheck</source>
+        <target>Continue to the Functional Health Check</target>
+      </segment>
+    </unit>
+    <unit id="9WGklJv" name="default.signIn">
+      <notes>
+        <note category="context">Home page: link to the sign-in form, shown to a visitor who is signed out.</note>
+      </notes>
+      <segment>
+        <source>default.signIn</source>
+        <target>Sign In</target>
+      </segment>
+    </unit>
+    <unit id="w8QSuKU" name="default.signOut">
+      <notes>
+        <note category="context">Home page: link that signs the user out.</note>
+      </notes>
+      <segment>
+        <source>default.signOut</source>
+        <target>Sign Out</target>
+      </segment>
+    </unit>
+    <unit id="F33ixIO" name="default.signedInAs_{email}">
+      <notes>
+        <note category="context">Home page: who is signed in.</note>
+        <note category="placeholders">{email}: email address of the account.</note>
+      </notes>
+      <segment>
+        <source>default.signedInAs_{email}</source>
+        <target>Signed in as {email}</target>
+      </segment>
+    </unit>
+    <unit id="VrxN5YI" name="default.tailwindCheck">
+      <notes>
+        <note category="context">Home page: heading that shows the stylesheet loaded.</note>
+      </notes>
+      <segment>
+        <source>default.tailwindCheck</source>
+        <target>If this box sits over a black-to-red background, Tailwind works.</target>
+      </segment>
+    </unit>
+    <unit id="BLBPgmi" name="email.common.pasteLink">
+      <notes>
+        <note category="context">Every email: above the plain link under the main button.</note>
+      </notes>
+      <segment>
+        <source>email.common.pasteLink</source>
+        <target>Or paste this link into your browser:</target>
+      </segment>
+    </unit>
+    <unit id="rv3GmI5" name="email.common.sentOn_{datetime}">
+      <notes>
+        <note category="context">Every email: footer line.</note>
+        <note category="placeholders">{datetime}: date and time the email was sent, already formatted.</note>
+      </notes>
+      <segment>
+        <source>email.common.sentOn_{datetime}</source>
+        <target>Sent on {datetime}</target>
+      </segment>
+    </unit>
+    <unit id="uFQK5JA" name="email.loginLink.button">
+      <notes>
+        <note category="context">Sign-in link email: main button.</note>
+      </notes>
+      <segment>
+        <source>email.loginLink.button</source>
+        <target>Sign In</target>
+      </segment>
+    </unit>
+    <unit id="TJnnyvT" name="email.loginLink.heading">
+      <notes>
+        <note category="context">Sign-in link email: heading.</note>
+      </notes>
+      <segment>
+        <source>email.loginLink.heading</source>
+        <target>Sign In</target>
+      </segment>
+    </unit>
+    <unit id="cD4Gnt5" name="email.loginLink.ignore">
+      <notes>
+        <note category="context">Sign-in link email: closing note.</note>
+      </notes>
+      <segment>
+        <source>email.loginLink.ignore</source>
+        <target>If you didn't request this email, you can safely ignore it.</target>
+      </segment>
+    </unit>
+    <unit id="CoSWjKB" name="email.loginLink.intro">
+      <notes>
+        <note category="context">Sign-in link email: text above the button.</note>
+      </notes>
+      <segment>
+        <source>email.loginLink.intro</source>
+        <target>Use the button below to sign in. This link can only be used once and expires shortly.</target>
+      </segment>
+    </unit>
+    <unit id="7F0i3cz" name="email.loginLink.subject">
+      <notes>
+        <note category="context">Subject of the email carrying a sign-in link.</note>
+      </notes>
+      <segment>
+        <source>email.loginLink.subject</source>
+        <target>Your sign-in link</target>
+      </segment>
+    </unit>
+    <unit id="seWqzjt" name="entity.user">
+      <notes>
+        <note category="context">Name of an account that signs in. Used on its own as a label or heading.</note>
+        <note category="placeholders">{count}: how many are meant; 1 unless the text names several.</note>
+        <note category="hint">Give the standalone nominative form, without an article. Add the plural categories the language needs.</note>
+      </notes>
+      <segment>
+        <source>entity.user</source>
+        <target>{count, plural, one {User} other {Users}}</target>
+      </segment>
+    </unit>
+    <unit id="jl0XPhZ" name="form.login.email.label">
+      <notes>
+        <note category="context">Sign-in page: email field label.</note>
+      </notes>
+      <segment>
+        <source>form.login.email.label</source>
+        <target>Email Address</target>
+      </segment>
+    </unit>
+    <unit id="wkLbSxd" name="form.login.email.placeholder">
+      <notes>
+        <note category="context">Sign-in page: placeholder of the email field.</note>
+        <note category="hint">A sample address, not a real one; localise the sample.</note>
+      </notes>
+      <segment>
+        <source>form.login.email.placeholder</source>
+        <target>name@company.com</target>
+      </segment>
+    </unit>
+    <unit id="r8gyZdM" name="form.login.remember.label">
+      <notes>
+        <note category="context">Sign-in page: checkbox that keeps the email address filled in on this device.</note>
+      </notes>
+      <segment>
+        <source>form.login.remember.label</source>
+        <target>Remember Me</target>
+      </segment>
+    </unit>
+    <unit id="TEoXPxO" name="login.confirm.aboutToSignAs_{user}">
+      <notes>
+        <note category="context">Page that confirms a sign-in link, above the Continue button.</note>
+        <note category="placeholders">{user}: email address of the account.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.aboutToSignAs_{user}</source>
+        <target>You're about to sign in as {user}</target>
+      </segment>
+    </unit>
+    <unit id="9fM3cLD" name="login.confirm.error.expired">
+      <notes>
+        <note category="context">Problem listed for a broken sign-in link.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.error.expired</source>
+        <target>The link has expired</target>
+      </segment>
+    </unit>
+    <unit id="zl.M3dK" name="login.confirm.error.invalidUsername_{user}">
+      <notes>
+        <note category="context">Problem listed for a broken sign-in link: the email address in it is not valid.</note>
+        <note category="placeholders">{user}: the address from the link, or the None message when it is missing.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.error.invalidUsername_{user}</source>
+        <target>The link includes an invalid username: {user}</target>
+      </segment>
+    </unit>
+    <unit id="rfSLIka" name="login.confirm.error.tooFarInTheFuture_{expires}">
+      <notes>
+        <note category="context">Problem listed for a broken sign-in link: its expiry date was tampered with.</note>
+        <note category="placeholders">{expires}: the expiry date written in the link.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.error.tooFarInTheFuture_{expires}</source>
+        <target>The expiry date {expires, date, medium} is too far in the future.</target>
+      </segment>
+    </unit>
+    <unit id="c8PTx49" name="login.confirm.error.used">
+      <notes>
+        <note category="context">Problem listed for a sign-in link that was already used once; links work a single time.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.error.used</source>
+        <target>The link has already been used</target>
+      </segment>
+    </unit>
+    <unit id="OXFU6.w" name="login.confirm.expired.heading">
+      <notes>
+        <note category="context">Heading of the page shown for an expired sign-in link.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.expired.heading</source>
+        <target>Too late, sorry!</target>
+      </segment>
+    </unit>
+    <unit id="2ozjiT3" name="login.confirm.expired.text_{ago}">
+      <notes>
+        <note category="context">Page shown for an expired sign-in link.</note>
+        <note category="placeholders">{ago}: how long ago, already translated, e.g. 5 minutes ago.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.expired.text_{ago}</source>
+        <target>This sign-in link expired {ago}.</target>
+      </segment>
+    </unit>
+    <unit id="1dihbhI" name="login.confirm.getNewLink">
+      <notes>
+        <note category="context">Button on the expired or broken sign-in link page that returns to the sign-in form.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.getNewLink</source>
+        <target>Get New Link</target>
+      </segment>
+    </unit>
+    <unit id="vjhGhk4" name="login.confirm.heading">
+      <notes>
+        <note category="context">Heading of the page that confirms a sign-in link before it signs the user in.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.heading</source>
+        <target>Almost There</target>
+      </segment>
+    </unit>
+    <unit id="RWE2eqi" name="login.confirm.invalid.heading">
+      <notes>
+        <note category="context">Heading of the page shown for a broken sign-in link.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.invalid.heading</source>
+        <target>The sign-in link is invalid</target>
+      </segment>
+    </unit>
+    <unit id="28EJmVE" name="login.confirm.invalid.ipRecorded_{ip}">
+      <notes>
+        <note category="context">Page shown for a broken sign-in link, under the list of problems.</note>
+        <note category="placeholders">{ip}: the visitor IP address.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.invalid.ipRecorded_{ip}</source>
+        <target>Your IP address {ip} has been recorded.</target>
+      </segment>
+    </unit>
+    <unit id="pjxjhiJ" name="login.confirm.ipWillBeRecorded_{ip}">
+      <notes>
+        <note category="context">Page that confirms a sign-in link, under the greeting.</note>
+        <note category="placeholders">{ip}: the visitor IP address.</note>
+      </notes>
+      <segment>
+        <source>login.confirm.ipWillBeRecorded_{ip}</source>
+        <target>Your IP address {ip} will be recorded.</target>
+      </segment>
+    </unit>
+    <unit id="5zrrCTM" name="login.request.description">
+      <notes>
+        <note category="context">Sign-in page: introduction above the email field.</note>
+      </notes>
+      <segment>
+        <source>login.request.description</source>
+        <target>Authenticate using a single-use sign-in link sent to your email address.</target>
+      </segment>
+    </unit>
+    <unit id="KXcfFAM" name="login.request.rateLimited_{retry}">
+      <notes>
+        <note category="context">Sign-in page: error after too many sign-in links were requested.</note>
+        <note category="placeholders">{retry}: minutes to wait.</note>
+      </notes>
+      <segment>
+        <source>login.request.rateLimited_{retry}</source>
+        <target>Please wait {retry, plural, =1 {a minute} other {# minutes}} before trying again</target>
+      </segment>
+    </unit>
+    <unit id="iyaecmG" name="login.request.working">
+      <notes>
+        <note category="context">Sign-in page: shown next to the Continue button while the link is being sent.</note>
+      </notes>
+      <segment>
+        <source>login.request.working</source>
+        <target>Sending your sign-in link...</target>
+      </segment>
+    </unit>
+    <unit id="l9TOEU4" name="login.sent.cta">
+      <notes>
+        <note category="context">Page shown after a sign-in link was sent.</note>
+      </notes>
+      <segment>
+        <source>login.sent.cta</source>
+        <target>A single-use sign-in link was sent to your address. Open it to sign in.</target>
+      </segment>
+    </unit>
+    <unit id="9pM16Ee" name="login.sent.heading">
+      <notes>
+        <note category="context">Heading of the page shown after a sign-in link was emailed.</note>
+      </notes>
+      <segment>
+        <source>login.sent.heading</source>
+        <target>Almost There</target>
+      </segment>
+    </unit>
+    <unit id="LjwJ_f." name="login.sent.nondelivery.nothingArrived">
+      <notes>
+        <note category="context">Page shown after a sign-in link was sent: heading of the troubleshooting list.</note>
+      </notes>
+      <segment>
+        <source>login.sent.nondelivery.nothingArrived</source>
+        <target>Nothing arrived?</target>
+      </segment>
+    </unit>
+    <unit id="dnkRBPl" name="login.sent.nondelivery.suggestion.callUs">
+      <notes>
+        <note category="context">Troubleshooting list item.</note>
+      </notes>
+      <segment>
+        <source>login.sent.nondelivery.suggestion.callUs</source>
+        <target>Call us</target>
+      </segment>
+    </unit>
+    <unit id="SJ9SrOU" name="login.sent.nondelivery.suggestion.checkSpam">
+      <notes>
+        <note category="context">Troubleshooting list item.</note>
+      </notes>
+      <segment>
+        <source>login.sent.nondelivery.suggestion.checkSpam</source>
+        <target>See if it landed in the spam folder</target>
+      </segment>
+    </unit>
+    <unit id="hlThjSg" name="login.sent.nondelivery.suggestion.wait">
+      <notes>
+        <note category="context">Troubleshooting list item.</note>
+      </notes>
+      <segment>
+        <source>login.sent.nondelivery.suggestion.wait</source>
+        <target>Wait, it can take up to a minute</target>
+      </segment>
+    </unit>
+    <unit id="aM8VRN8" name="login.sent.nondelivery.suggestions">
+      <notes>
+        <note category="context">Page shown after a sign-in link was sent: introduction of the troubleshooting list.</note>
+      </notes>
+      <segment>
+        <source>login.sent.nondelivery.suggestions</source>
+        <target>Here is what you could do:</target>
+      </segment>
+    </unit>
+    <unit id="Tx3gwhE" name="login.step.title">
+      <notes>
+        <note category="context">Title row of the sign-in step.</note>
+      </notes>
+      <segment>
+        <source>login.step.title</source>
+        <target>Sign In</target>
+      </segment>
+    </unit>
+    <unit id="YS5dLPf" name="logout.heading">
+      <notes>
+        <note category="context">Heading of the page shown after signing out.</note>
+      </notes>
+      <segment>
+        <source>logout.heading</source>
+        <target>You're signed out</target>
+      </segment>
+    </unit>
+    <unit id="D6OaCw3" name="logout.logBackIn">
+      <notes>
+        <note category="context">Button on the signed-out page that returns to the sign-in form.</note>
+      </notes>
+      <segment>
+        <source>logout.logBackIn</source>
+        <target>Sign Back In</target>
+      </segment>
+    </unit>
+    <unit id="bnhFBc9" name="shared.button.continue">
+      <notes>
+        <note category="context">Button that submits a step and moves on: the sign-in form and the sign-in link confirmation.</note>
+      </notes>
+      <segment>
+        <source>shared.button.continue</source>
+        <target>Continue</target>
+      </segment>
+    </unit>
+    <unit id="rDrmuxj" name="shared.button.tryAgain">
+      <notes>
+        <note category="context">Link back to the sign-in form, in the list of things to do when a sign-in link did not arrive.</note>
+      </notes>
+      <segment>
+        <source>shared.button.tryAgain</source>
+        <target>Try Again</target>
+      </segment>
+    </unit>
+    <unit id="uCWIkfd" name="shared.value.none">
+      <notes>
+        <note category="context">Stands in for a missing email address in a sign-in link error.</note>
+      </notes>
+      <segment>
+        <source>shared.value.none</source>
+        <target>None</target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

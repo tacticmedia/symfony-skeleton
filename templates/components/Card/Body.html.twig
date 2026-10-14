@@ -1,0 +1,4 @@
+{# Padded content section of a card; `spaced` stacks its children with space-y-6. #}
+{% props spaced = false %}
+
+<div{{ attributes.defaults({class: 'px-4 py-5 sm:p-6' ~ (spaced ? ' space-y-6' : '')}) }}>{% block content %}{% endblock %}</div>

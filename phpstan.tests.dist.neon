@@ -1,0 +1,42 @@
+parameters:
+    level: 8
+    doctrine:
+        objectManagerLoader: phpstan/object-manager.php
+    symfony:
+        consoleApplicationLoader: phpstan/console-application.php
+        containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml
+    tmpDir: var/phpstan/tests
+    bootstrapFiles:
+        - vendor/autoload.php
+    paths:
+        - tests
+
+    cognitive_complexity:
+        class: 30
+        function: 6
+
+    disallowedMethodCalls:
+        -
+            method:
+                - 'Symfony\Component\DomCrawler\Crawler::selectButton()'
+                - 'Symfony\Component\DomCrawler\Crawler::selectLink()'
+                - 'Symfony\Component\DomCrawler\Crawler::selectImage()'
+                - 'Symfony\Component\DomCrawler\Crawler::filterXPath()'
+                - 'Symfony\Component\Panther\DomCrawler\Crawler::selectButton()'
+                - 'Symfony\Component\Panther\DomCrawler\Crawler::selectLink()'
+                - 'Symfony\Component\Panther\DomCrawler\Crawler::selectImage()'
+                - 'Symfony\Component\Panther\DomCrawler\Crawler::filterXPath()'
+                - 'Symfony\Component\BrowserKit\AbstractBrowser::clickLink()'
+                - 'Symfony\Component\BrowserKit\AbstractBrowser::submitForm()'
+            message: 'locate the element by its data-test-id, see docs/test-ids.md'
+
+    disallowedStaticCalls:
+        -
+            method:
+                - 'Facebook\WebDriver\WebDriverBy::linkText()'
+                - 'Facebook\WebDriver\WebDriverBy::partialLinkText()'
+                - 'Facebook\WebDriver\WebDriverBy::xpath()'
+            message: 'locate the element by its data-test-id, see docs/test-ids.md'
+
+includes:
+    - phar://vendor/phpstan/phpstan/phpstan.phar/conf/bleedingEdge.neon

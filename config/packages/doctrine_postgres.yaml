@@ -1,0 +1,11 @@
+# See https://github.com/martin-georgiev/postgresql-for-doctrine/blob/main/docs/INTEGRATING-WITH-SYMFONY.md
+doctrine:
+    dbal:
+        types:
+            'text[]': MartinGeorgiev\Doctrine\DBAL\Types\TextArray
+
+        connections:
+            default:
+                mapping_types:
+                    'text[]': !php/const MartinGeorgiev\Doctrine\DBAL\Type::TEXT_ARRAY
+                    _text: !php/const MartinGeorgiev\Doctrine\DBAL\Type::TEXT_ARRAY

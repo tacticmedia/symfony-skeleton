@@ -1,0 +1,42 @@
+parameters:
+    level: 8
+    doctrine:
+        objectManagerLoader: phpstan/object-manager.php
+    symfony:
+        consoleApplicationLoader: phpstan/console-application.php
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    tmpDir: var/phpstan/src
+    bootstrapFiles:
+        - vendor/autoload.php
+    # tests/ is analysed by phpstan.tests.dist.neon with the test container.
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+    excludePaths:
+        - config/reference.php
+    ignoreErrors:
+        -
+            message: '#database can contain string but property expects lowercase-string&non-empty-string#'
+            paths:
+                - src/Entity/User.php
+
+    cognitive_complexity:
+        class: 30
+        function: 6
+
+    disallowedMethodCalls:
+        -
+            method: 'Symfony\Bundle\FrameworkBundle\Controller\AbstractController::addFlash()'
+            message: 'pass a TranslatableMessage, never a bare key'
+            allowParamsAnywhere:
+                -
+                    position: 2
+                    name: 'message'
+                    typeString: 'Symfony\Contracts\Translation\TranslatableInterface'
+
+includes:
+    # The phar path, not vendor/phpstan/phpstan/conf/: that file includes phar://phpstan.phar/,
+    # an alias only the phpstan binary registers, so Rector cannot load it.
+    - phar://vendor/phpstan/phpstan/phpstan.phar/conf/bleedingEdge.neon

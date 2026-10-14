@@ -1,0 +1,48 @@
+{% apply inky_to_html|inline_css(source('@email/itools.css'))|inline_css(source('@email/foundation.css')) %}
+<html>
+<head></head>
+<body>
+<spacer size="32"></spacer>
+
+<wrapper class="body">
+    <container class="header">
+        {% block header %}
+            <row>
+                <columns small="12" large="12">
+                    LOGO PLACEHOLDER
+                </columns>
+            </row>
+        {% endblock header %}
+        <spacer size="8"></spacer>
+    </container>
+
+    {% set importance = importance ?? 'normal' %}
+
+    <container class="{{ html_classes({
+        'body_urgent': 'urgent' == importance,
+        'body_alert': 'high' == importance,
+        'body_default': importance not in ['urgent', 'high'],
+    }) }}">
+        <spacer size="32"></spacer>
+        {% block body %}
+        {% endblock body %}
+    </container>
+
+    <container class="footer">
+        <spacer size="16"></spacer>
+        {% block footer %}
+            <row>
+                <columns small="12" large="12" valign="middle" align="right">
+                    <p class="text-right" style="margin-bottom:0;padding:0;">
+                        {{- 'email.common.sentOn_{datetime}'|trans({
+                            datetime: 'now'|format_datetime('long', 'long', '', timezone ?? 'UTC')
+                        }) -}}
+                    </p>
+                </columns>
+            </row>
+        {% endblock %}
+    </container>
+</wrapper>
+</body>
+</html>
+{% endapply %}

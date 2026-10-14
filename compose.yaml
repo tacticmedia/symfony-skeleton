@@ -1,0 +1,100 @@
+---
+services:
+  php:
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - target: 80
+        published: ${HTTP_PORT:-80}
+        protocol: tcp
+      - target: 443
+        published: ${HTTPS_PORT:-443}
+        protocol: tcp
+      - target: 443
+        published: ${HTTP3_PORT:-443}
+        protocol: udp
+
+  # Scheduled console commands (see frankenphp/crontab).
+  cron:
+    restart: unless-stopped
+    # docker-php-entrypoint, not the app entrypoint: the `php` service owns
+    # migrations; this container must not race it on boot.
+    entrypoint: docker-php-entrypoint
+    # Absolute path: supercronic re-execs itself via argv[0] when it is PID 1.
+    command: /usr/local/bin/supercronic /etc/frankenphp/crontab
+    healthcheck:
+      # The image healthcheck probes Caddy, which this container does not run.
+      disable: true
+    depends_on:
+      database:
+        condition: service_healthy
+      php:
+        condition: service_healthy
+    environment:
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      DATABASE_NAME: ${POSTGRES_DB:-app}
+      DATABASE_USER: ${POSTGRES_USER:-app}
+      DATABASE_SERVER_VERSION: ${POSTGRES_VERSION:-18}
+
+  # Consumes the `async` transport (config/packages/messenger.yaml).
+  # The limits end the process; the restart policy starts a fresh one.
+  worker:
+    restart: unless-stopped
+    entrypoint: docker-php-entrypoint
+    command: php bin/console messenger:consume async --time-limit=3600 --memory-limit=256M --keepalive
+    # On SIGTERM the worker finishes the message in hand.
+    stop_grace_period: 330s
+    healthcheck:
+      disable: true
+    depends_on:
+      database:
+        condition: service_healthy
+      # Healthy once its entrypoint has run the migrations and set up the queue table.
+      php:
+        condition: service_healthy
+    environment:
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+
+  # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
+  ###> symfony/mercure-bundle ###
+  ###< symfony/mercure-bundle ###
+
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:${POSTGRES_VERSION:-18}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+  caddy_data:
+  caddy_config:
+  ###> symfony/mercure-bundle ###
+  ###< symfony/mercure-bundle ###
+
+  ###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###

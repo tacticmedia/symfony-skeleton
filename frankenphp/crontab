@@ -1,0 +1,7 @@
+# Run by supercronic in the `cron` compose service, which waits for a job to
+# finish before scheduling it again. A job that must not overlap a run from a
+# second container takes a lock (symfony/lock).
+CRON_TZ=Australia/Adelaide
+
+# minute hour day-of-month month day-of-week command
+# 0 6 * * * php /app/bin/console app:example

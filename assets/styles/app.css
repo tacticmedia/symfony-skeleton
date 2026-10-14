@@ -1,0 +1,39 @@
+@import "tailwindcss" source(none);
+@source "../../assets";
+@source "../../src";
+@source "../../templates";
+
+/* The screenshot review markup lives in the QA bundle ({@see docs/qa.md}). */
+@source "../../vendor/tacticmedia/qa-bundle/templates";
+/* The form theme in config/packages/twig.yaml. */
+@source "../../vendor/symfony/twig-bridge/Resources/views/Form/tailwind_2_layout.html.twig";
+
+@theme {
+    --color-brand-yellow-50: #fefce8;
+    --color-brand-yellow-100: #fdf9c4;
+    --color-brand-yellow-200: #fcf08c;
+    --color-brand-yellow-300: #fae14a;
+    --color-brand-yellow-400: #f7d024;
+    --color-brand-yellow-500: #e7b50b;
+    --color-brand-yellow-600: #c78c07;
+    --color-brand-yellow-700: #9f6409;
+    --color-brand-yellow-800: #834f10;
+    --color-brand-yellow-900: #704113;
+    --color-brand-yellow-950: #412107;
+
+    --color-brand-red-50: #fef3f2;
+    --color-brand-red-100: #ffe3e1;
+    --color-brand-red-200: #ffccc9;
+    --color-brand-red-300: #fea8a3;
+    --color-brand-red-400: #fb766e;
+    --color-brand-red-500: #f34a40;
+    --color-brand-red-600: #e02b20;
+    --color-brand-red-700: #bd2118;
+    --color-brand-red-800: #9c2018;
+    --color-brand-red-900: #81211b;
+    --color-brand-red-950: #460c09;
+}
+
+.button-primary {
+    @apply border rounded-md inline-block px-2 py-1;
+}

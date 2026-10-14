@@ -1,0 +1,13 @@
+{%- extends 'base.stream.html.twig' -%}
+
+{%- block stream -%}
+    <turbo-stream action="{{ action|default('append') }}" target="{{ target }}">{#--#}
+        <template>
+            {%- if rawContent is defined and rawContent is same as true -%}
+                {{- content|raw -}}
+            {%- else -%}
+                {{- content -}}
+            {%- endif -%}
+        </template>{#--#}
+    </turbo-stream>
+{%- endblock -%}

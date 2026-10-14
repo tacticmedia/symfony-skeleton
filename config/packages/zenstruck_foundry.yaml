@@ -1,0 +1,27 @@
+# Factories and stories extend a require-dev package, so they live under the
+# autoload-dev root and are registered only here. A production install neither
+# autoloads nor compiles them, and the makers generate into tests/ to match.
+when@dev: &dev
+    zenstruck_foundry:
+        enable_auto_refresh_with_lazy_objects: true
+        persistence:
+            # Flush only once per call of `PersistentObjectFactory::create()`
+            flush_once: true
+        make_factory:
+            default_namespace: 'Tests\Factory'
+        make_story:
+            default_namespace: 'Tests\Story'
+
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+
+        App\Tests\Factory\:
+            resource: '%kernel.project_dir%/tests/Factory/'
+
+        App\Tests\Story\:
+            resource: '%kernel.project_dir%/tests/Story/'
+            exclude: '%kernel.project_dir%/tests/Story/*Test.php'
+
+when@test: *dev

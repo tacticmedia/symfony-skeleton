@@ -1,0 +1,9 @@
+# Mailpit's UI, proxied so it shares the trusted local certificate. Development
+# only: it exposes every message the app sent, including sign-in links.
+localhost:8025 {
+	reverse_proxy mailer:8025
+
+	tls internal {
+		on_demand
+	}
+}

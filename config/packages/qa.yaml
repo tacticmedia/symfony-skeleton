@@ -1,0 +1,5 @@
+# Each journey suite writes its own tree, because each run empties its root.
+# QA_REVIEW_TREE picks the tree the review page reads: panther or playwright.
+when@dev:
+    qa:
+        screenshots_dir: '%kernel.project_dir%/var/screenshots/%env(QA_REVIEW_TREE)%'

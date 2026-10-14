@@ -1,0 +1,16 @@
+{% extends '_emails/base.html.twig' %}
+
+{% block body %}
+    <row>
+        <columns>
+            <h1>{{ 'email.loginLink.heading'|trans }}</h1>
+            <p>{{ 'email.loginLink.intro'|trans }}</p>
+            <button href="{{ login_link_url }}">{{ 'email.loginLink.button'|trans }}</button>
+            <p>
+                {{ 'email.common.pasteLink'|trans }}<br>
+                <a href="{{ login_link_url }}">{{ login_link_url }}</a>
+            </p>
+            <p>{{ 'email.loginLink.ignore'|trans }}</p>
+        </columns>
+    </row>
+{% endblock %}

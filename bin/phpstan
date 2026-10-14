@@ -1,0 +1,21 @@
+#!/bin/bash
+
+BASE_DIR="$(cd "$(dirname $0)/.." >/dev/null 2>&1 && pwd)"
+
+$BASE_DIR/bin/console cache:warmup --env=dev
+
+./vendor/bin/phpstan analyse --configuration "$BASE_DIR/phpstan.dist.neon" --memory-limit=-1 $@
+
+FIRST=$?
+
+$BASE_DIR/bin/console cache:warmup --env=test
+
+./vendor/bin/phpstan analyse --configuration "$BASE_DIR/phpstan.tests.dist.neon" --memory-limit=-1 $@
+
+SECOND=$?
+
+if [ "$FIRST" = 0 ] && [ "$SECOND" = 0 ]; then
+  exit 0
+else
+  exit 1
+fi

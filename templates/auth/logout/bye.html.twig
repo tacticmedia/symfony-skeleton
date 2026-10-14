@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12 text-center text-gray-900 lg:px-8 dark:text-gray-100">
+        <twig:Heading level="1" size="lg" data-test-id="page-title">{{ 'logout.heading'|trans }}</twig:Heading>
+        <twig:Button href="{{ path('login_link') }}" data-test-id="logout-sign-in">{{ 'logout.logBackIn'|trans }}</twig:Button>
+    </div>
+{% endblock %}

@@ -1,0 +1,181 @@
+---
+# Development environment override
+services:
+  php:
+    image: ${IMAGES_PREFIX:-}app-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
+      - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      # Both ini files are mounted so an edit takes effect on restart, not on rebuild.
+      - ./frankenphp/conf.d/10-app.ini:/usr/local/etc/php/app.conf.d/10-app.ini:ro
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
+      - ./frankenphp/sites-dev:/etc/frankenphp/sites-dev:ro
+      # Keep var/ off the bind-mount for faster I/O on Mac/Windows; comment to inspect from the host.
+      - /app/var
+      # If you develop on Mac or Windows you can remove the vendor/ directory
+      #  from the bind-mount for better performance by enabling the next line:
+      #- /app/vendor
+      # Persists the CA Caddy generates on first boot, so the certificate you trust
+      # once stays valid across container rebuilds. The directory is gitignored -
+      # the CA is per developer and must never be committed ({@see docs/tls.md}).
+      - ./frankenphp/pki/authorities/local:/data/caddy/pki/authorities/local:rw
+      - tailwind:/app/var/tailwind
+      # Journey screenshots readable from the host ({@see docs/qa.md}).
+      - ./var/screenshots:/app/var/screenshots
+      # Panther's capture of the page a failing journey stopped on.
+      - ./var/error-screenshots:/app/var/error-screenshots
+      # Screenshot review notes, kept off the anonymous var/ volume so a review
+      # survives a container rebuild ({@see docs/qa.md}).
+      - ./var/review:/app/var/review
+      - ./var/log:/app/var/log
+    environment:
+      # Scoped to the sources a reload needs. A bare `watch` falls back to
+      # ./**/*.{env,php,twig,yaml,yml} from /app, which sweeps in the generated
+      # files under var/cache: clearing the cache then has the rebuild restart the
+      # workers mid-rebuild, and the app never finishes booting.
+      FRANKENPHP_WORKER_CONFIG: |
+        watch ./src/**/*.php
+        watch ./config/**/*.{php,yaml,yml}
+        watch ./templates/**/*.twig
+        watch ./translations/**/*.xlf
+        watch ./.env
+        watch ./.env.*
+      # It's buggy - breaks CSP and logs the user out intermittently. Let's not use it for now.
+      # FRANKENPHP_SITE_CONFIG: hot_reload
+      MERCURE_EXTRA_DIRECTIVES: anonymous
+      # See https://xdebug.org/docs/all_settings#mode
+      XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
+      APP_ENV: "${APP_ENV:-dev}"
+      MAILER_DSN: "smtp://mailer:1025"
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
+    ports:
+      # Caddy proxies https://localhost:8025 to the Mailpit UI (see frankenphp/Caddyfile)
+      - "127.0.0.1:8025:8025"
+    tty: true
+  ###> symfony/mercure-bundle ###
+  ###< symfony/mercure-bundle ###
+
+  # Runs the whole e2e suite (make test-e2e) against its own app_e2e database;
+  # https://localhost in here is this container's Caddy.
+  php-e2e:
+    image: ${IMAGES_PREFIX:-}app-php-e2e
+    build:
+      context: .
+      target: frankenphp_dev
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      - ./frankenphp/conf.d/10-app.ini:/usr/local/etc/php/app.conf.d/10-app.ini:ro
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
+      - ./frankenphp/sites-dev:/etc/frankenphp/sites-dev:ro
+      - /app/var
+      # Same authority as the php service, so one trusted certificate covers both.
+      - ./frankenphp/pki/authorities/local:/data/caddy/pki/authorities/local:rw
+      - tailwind:/app/var/tailwind
+      # Shared with the php service, whose /_dev/screenshots serves the review.
+      - ./var/screenshots:/app/var/screenshots
+      - ./var/error-screenshots:/app/var/error-screenshots
+      - ./var/review:/app/var/review
+      - ./var/log:/app/var/log
+    environment:
+      APP_ENV: dev
+      SERVER_NAME: localhost, php-e2e:80
+      DEFAULT_URI: https://localhost
+      DATABASE_NAME: ${POSTGRES_DB:-app}_e2e
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_URL: http://php-e2e/.well-known/mercure
+      MERCURE_PUBLIC_URL: https://localhost/.well-known/mercure
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_EXTRA_DIRECTIVES: anonymous
+      FRANKENPHP_WORKER_CONFIG: |
+        watch ./src/**/*.php
+        watch ./config/**/*.{php,yaml,yml}
+        watch ./templates/**/*.twig
+        watch ./translations/**/*.xlf
+        watch ./.env
+        watch ./.env.*
+      MAILER_DSN: "smtp://mailer:1025"
+      XDEBUG_MODE: "off"
+    depends_on:
+      # A healthy php means vendor/ is installed and the certificate authority
+      # exists before this entrypoint runs trust-local-ca.
+      php:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  cron:
+    image: ${IMAGES_PREFIX:-}app-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - .:/app
+      # Keep var/ off the bind-mount like the php service: the container runs
+      # as root and would otherwise leave root-owned cache in the checkout.
+      - /app/var
+      - ./frankenphp/crontab:/etc/frankenphp/crontab:ro
+    environment:
+      APP_ENV: dev
+      MAILER_DSN: "smtp://mailer:1025"
+
+  # Runs the code it started with: `docker compose restart worker` after changing it.
+  worker:
+    image: ${IMAGES_PREFIX:-}app-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      # The bind-mount shares storage/ with the php service.
+      - .:/app
+      - /app/var
+    environment:
+      APP_ENV: dev
+
+  tailwind:
+    image: ${IMAGES_PREFIX:-}app-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    command: php bin/console tailwind:build --watch
+    entrypoint: docker-php-entrypoint
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    volumes:
+      - .:/app
+      - tailwind:/app/var/tailwind
+    depends_on:
+      # A healthy php means vendor/ is installed; bin/console dies without it.
+      php:
+        condition: service_healthy
+    environment:
+      APP_ENV: dev
+
+  ###> doctrine/doctrine-bundle ###
+  database:
+    ports:
+      # Off the default port, so the stack runs beside another PostgreSQL on the host.
+      - 127.0.0.1:${POSTGRES_PORT:-25432}:5432
+  ###< doctrine/doctrine-bundle ###
+
+  ###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025"
+      - "8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+###< symfony/mailer ###
+
+volumes:
+  tailwind:

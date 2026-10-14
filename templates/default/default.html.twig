@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="flex w-screen min-h-screen items-center justify-center bg-linear-to-br from-black via-red-950 to-red-700 text-white">
+        <div class="flex flex-col items-center gap-5 px-4 text-center">
+            <h1 class="m-0 px-4 py-2 bg-orange-800/80 backdrop-blur-sm rounded-md border-white/50 border-1 text-white" data-test-id="page-title">{{ 'default.tailwindCheck'|trans }}</h1>
+            <a href="{{ path('health_check_functional') }}" class="underline hover:no-underline" data-test-id="default-health-check">{{ 'default.healthCheck'|trans }}</a>
+
+            {% if is_granted('IS_AUTHENTICATED') %}
+                <p data-test-id="default-signed-in">{{ 'default.signedInAs_{email}'|trans({email: app.user.userIdentifier}) }}</p>
+                <a href="{{ logout_path() }}" class="underline hover:no-underline" data-test-id="default-sign-out">{{ 'default.signOut'|trans }}</a>
+
+                {% if app.debug %}
+                    <nav class="flex gap-4 text-sm" data-test-id="default-dev-tools">
+                        <a href="{{ path('navigation_toggle_turbo', {_return_to: app.request.requestUri}) }}" class="underline hover:no-underline" data-test-id="layout-toggle-turbo">{{ 'default.devTools.toggleTurbo'|trans }}</a>
+                        <a href="{{ path('navigation_toggle_translation', {_return_to: app.request.requestUri}) }}" class="underline hover:no-underline" data-test-id="layout-toggle-translation">{{ 'default.devTools.toggleTranslation'|trans }}</a>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <a href="{{ path('login_link') }}" class="underline hover:no-underline" data-test-id="default-sign-in">{{ 'default.signIn'|trans }}</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

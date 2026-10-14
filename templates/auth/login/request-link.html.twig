@@ -1,0 +1,26 @@
+{% extends 'auth/login/base.html.twig' %}
+
+{% block login_title %}{{ 'login.step.title'|trans }}{% endblock %}
+
+{% block login %}
+    <twig:Card:Body class="pt-0">
+        {% if error %}
+            <twig:Alert type="error" data-test-id="login-error">{{ error.messageKey|trans(error.messageData, 'security') }}</twig:Alert>
+        {% endif %}
+        {% if rateLimitError %}
+            <twig:Alert type="error" data-test-id="login-rate-limit-error">{{ rateLimitError|trans }}</twig:Alert>
+        {% endif %}
+
+        <div class="mb-4">
+            <p class="font-light text-gray-600 dark:text-gray-400">{{ 'login.request.description'|trans }}</p>
+        </div>
+
+        {{- form_start(form) -}}
+        {{ form_rest(form) }}
+        <div class="mt-4 flex items-center gap-3">
+            <twig:Button type="submit" data-test-id="login-request">{{ 'shared.button.continue'|trans }}</twig:Button>
+            <p {{ stimulus_target('login', 'working') }} data-test-id="login-working" class="hidden text-sm font-light text-gray-600 dark:text-gray-400">{{ 'login.request.working'|trans }}</p>
+        </div>
+        {{ form_end(form) }}
+    </twig:Card:Body>
+{% endblock %}

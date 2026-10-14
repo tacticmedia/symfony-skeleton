@@ -1,0 +1,30 @@
+{#
+    A message panel. `heading` leads the text, the `actions` block sits on the right. `live`
+    announces it; a notice that is part of the page passes false.
+#}
+{% props type = 'info', heading = null, live = true %}
+
+{%- set alert = html_cva(
+    base: 'flex flex-wrap items-start gap-3 rounded-lg border px-4 py-3 text-sm shadow-sm',
+    variants: {
+        type: {
+            success: 'border-green-200 bg-green-50 text-green-800 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-300',
+            error: 'border-brand-red-200 bg-brand-red-50 text-brand-red-800 dark:border-brand-red-500/20 dark:bg-brand-red-500/10 dark:text-brand-red-300',
+            warning: 'border-brand-yellow-200 bg-brand-yellow-50 text-brand-yellow-900 dark:border-brand-yellow-500/20 dark:bg-brand-yellow-500/10 dark:text-brand-yellow-200',
+            info: 'border-gray-200 bg-white text-gray-700 dark:border-white/10 dark:bg-zinc-800 dark:text-gray-200',
+        },
+    },
+) -%}
+{%- set icons = {success: 'iconoir:check-circle', error: 'iconoir:xmark-circle', warning: 'iconoir:warning-triangle', info: 'iconoir:info-circle'} -%}
+{%- set actions -%}{% block actions %}{% endblock %}{%- endset -%}
+
+<div{% if live %} role="alert"{% endif %}{{ attributes.defaults({class: alert.apply({type})}) }}>
+    <twig:ux:icon name="{{ icons[type] ?? icons.info }}" aria-hidden="true" class="mt-0.5 size-5 shrink-0" />
+    <div class="min-w-0 flex-1">
+        {% if heading %}<p class="font-medium">{{ heading }}</p>{% endif %}
+        <div{% if heading %} class="mt-0.5"{% endif %}>{% block content %}{% endblock %}</div>
+    </div>
+    {% if actions|trim %}
+        <div class="flex shrink-0 flex-wrap items-center gap-2">{{ actions }}</div>
+    {% endif %}
+</div>

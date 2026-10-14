@@ -1,0 +1,26 @@
+{#
+    `level` is the HTML level (1-4), `size` the visual scale (xl, lg, md, base, sm). The two are
+    independent. Spacing is the caller's.
+#}
+{% props level = 2, size = 'base', tone = 'default' %}
+
+{%- set heading = html_cva(
+    variants: {
+        size: {
+            xl: 'text-3xl font-semibold tracking-tight text-balance sm:text-5xl',
+            lg: 'text-2xl font-semibold tracking-tight',
+            md: 'text-lg font-semibold tracking-tight',
+            base: 'text-base font-semibold',
+            sm: 'text-sm font-semibold',
+        },
+        tone: {
+            default: 'text-gray-900 dark:text-slate-300',
+            danger: 'text-brand-red-800 dark:text-brand-red-300',
+            inverse: 'text-white',
+            contrast: 'text-zinc-950',
+        },
+    },
+) -%}
+
+{%- set tag = 'h' ~ level -%}
+<{{ tag }}{{ attributes.defaults({class: heading.apply({size, tone})}) }}>{% block content %}{% endblock %}</{{ tag }}>

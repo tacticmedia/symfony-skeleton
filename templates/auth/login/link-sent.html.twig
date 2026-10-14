@@ -1,0 +1,17 @@
+{% extends 'auth/login/base.html.twig' %}
+
+{% block login_title %}{{ 'login.sent.heading'|trans }}{% endblock %}
+
+{% block login %}
+    <twig:Card:Body class="pt-0 text-gray-600 dark:text-gray-300">
+        <p class="font-light">{{ 'login.sent.cta'|trans }}</p>
+        <twig:Heading size="md" class="pt-8">{{ 'login.sent.nondelivery.nothingArrived'|trans }}</twig:Heading>
+        <twig:Heading level="3" size="sm" class="pt-4">{{ 'login.sent.nondelivery.suggestions'|trans }}</twig:Heading>
+        <ol class="list-decimal pl-6 text-sm">
+            <li>{{ 'login.sent.nondelivery.suggestion.wait'|trans }}</li>
+            <li>{{ 'login.sent.nondelivery.suggestion.checkSpam'|trans }}</li>
+            <li><twig:Link href="{{ path('login_link', returnParameters) }}" data-test-id="login-retry" class="underline hover:no-underline">{{ 'shared.button.tryAgain'|trans }}</twig:Link></li>
+            <li>{{ 'login.sent.nondelivery.suggestion.callUs'|trans }}</li>
+        </ol>
+    </twig:Card:Body>
+{% endblock %}

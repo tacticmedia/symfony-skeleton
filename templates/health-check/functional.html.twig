@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="grid gap-4 p-4">
+        <twig:Card aria-labelledby="health-check-mercure-heading">
+            <twig:Card:Header>
+                <div>
+                    <twig:Heading id="health-check-mercure-heading">Mercure Hub</twig:Heading>
+                    <p class="mt-1 text-sm">Click the button to see both boxes change background colour. If the left box fails to change the colour, the test failed.</p>
+                </div>
+            </twig:Card:Header>
+            <twig:Card:Body class="pt-0">
+                {{ turbo_stream_from('functional_health_check') }}
+                <div class="gap-4 grid grid-cols-2 p-4 bg-gray-50 dark:bg-zinc-700/25 rounded p-4 border border-gray-100 dark:border-white/10 text-center">
+                    <turbo-frame id="functional_health_check_turbo_frame">
+                        <div class="relative flex flex-column gap-4 min-h-32 items-center justify-center" style="background:#{{ backgroundColor }}" nonce="{{ csp_nonce('style') }}">
+                            <span>
+                                <a href="{{ path('health_check_functional', {
+                                    testMercure: true,
+                                    testMercureCounter,
+                                }) }}" class="button-primary" data-turbo-prefetch="false" data-test-id="health-check-mercure-run">Run test #{{ testMercureCounter + 1 }}</a>
+                            </span>
+                            {% if mercureError is defined and mercureError is not empty %}
+                                <twig:Alert type="error" data-test-id="health-check-mercure-error">{{ mercureError }}</twig:Alert>
+                            {% endif %}
+                        </div>
+                    </turbo-frame>
+                    <div class="flex items-center justify-center" style="background:#{{ backgroundColor }}" {# nonce="{{ csp_nonce('style') }}" #} id="mercure_target" data-test-id="health-check-mercure-target">
+                        <twig:Badge>Awaiting Mercure Message</twig:Badge>
+                    </div>
+                    <div class="col-span-full text-left text-sm text-gray-500 dark:text-gray-400">The left box is driven by a server response, the other is driven by a Turbo Stream message coming through.</div>
+                </div>
+            </twig:Card:Body>
+        </twig:Card>
+
+        <twig:Card aria-labelledby="health-check-email-heading">
+            <twig:Card:Header>
+                <div>
+                    <twig:Heading id="health-check-email-heading">E-mail delivery</twig:Heading>
+                    <p class="mt-1 text-sm">Do you receive an email in your inbox (not a spam folder!) a few seconds after clicking the button below?</p>
+                </div>
+            </twig:Card:Header>
+            <twig:Card:Body class="pt-0">
+                <turbo-frame id="functional-health-check-email">
+                    <div class="space-y-4">
+                    <a href="{{ path(app.current_route, app.current_route_parameters|merge({'email': true})) }}" class="button-primary" data-test-id="health-check-email-send">Send an email to {{ app.user.email is defined ? app.user.email : 'foo@localhost' }}</a>
+
+                    {% if emailResult is same as true %}
+                        <twig:Alert type="success" data-test-id="health-check-email-sent">It seems the e-mail has been dispatched. Please check your inbox.</twig:Alert>
+                    {% elseif emailResult is not empty %}
+                        <twig:Alert type="warning" data-test-id="health-check-email-failed">It seems something went wrong when dispatching the email.</twig:Alert>
+                    {% endif %}
+                    </div>
+                </turbo-frame>
+            </twig:Card:Body>
+        </twig:Card>
+    </div>
+{% endblock %}

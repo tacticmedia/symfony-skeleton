@@ -1,0 +1,14 @@
+mercure:
+    hubs:
+        default:
+            url: '%env(default::MERCURE_URL)%'
+            public_url: '%env(default::MERCURE_PUBLIC_URL)%'
+            protocol_version: '1.0'
+            jwt:
+                secret: '%env(MERCURE_JWT_SECRET)%'
+                publish: '*'
+                claims:
+                    # Must equal the Caddyfile `issuer`.
+                    iss: '%env(DEFAULT_URI)%'
+                    sub: '%env(DEFAULT_URI)%'
+                    client_id: '%env(DEFAULT_URI)%'

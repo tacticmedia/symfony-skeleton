@@ -1,0 +1,13 @@
+{#-
+    Base template for UX Turbo Stream responses.
+    See https://github.com/symfony/ux-turbo#coming-alive-with-turbo-streams
+-#}
+
+{%- if app.request -%}
+    {%- include '_mercure/flash-messages.stream.html.twig' -%}
+{%- endif -%}
+
+{%- block stream -%}
+    {# Extend this block to include additional Turbo Stream #}
+{%- endblock -%}
+

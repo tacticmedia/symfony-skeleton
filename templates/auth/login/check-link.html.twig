@@ -1,0 +1,59 @@
+{% extends 'auth/login/base.html.twig' %}
+
+{% set outcome = expires != 0 and expires < 'now'|date('U') ? 'expired' : (errors is not empty ? 'invalid' : 'valid') %}
+
+{% block login_title %}
+    {%- if outcome == 'expired' -%}
+        {{ 'login.confirm.expired.heading'|trans }}
+    {%- elseif outcome == 'invalid' -%}
+        {{ 'login.confirm.invalid.heading'|trans }}
+    {%- else -%}
+        {{ 'login.confirm.heading'|trans }}
+    {%- endif -%}
+{% endblock %}
+
+{% block login %}
+    <twig:Card:Body class="pt-0">
+        {% if outcome == 'expired' %}
+            <p class="pb-4 text-lg text-gray-600 dark:text-gray-400">
+                {{ 'login.confirm.expired.text_{ago}'|trans({ago: expires|date|ago}) }}
+            </p>
+            <twig:Button href="{{ path('login_link', returnParameters) }}" full data-test-id="login-retry">
+                {{- 'login.confirm.getNewLink'|trans -}}
+            </twig:Button>
+        {% elseif outcome == 'invalid' %}
+            <ul data-test-id="login-errors" class="{{ html_classes('pb-4 font-bold text-red-600 dark:text-red-400', {
+                'list-decimal pl-6': errors|length > 1
+            }) }}">
+            {%- for error in errors -%}
+                <li>{{ error|trans }}</li>
+            {%- endfor -%}
+            </ul>
+            <p class="pb-8 text-sm text-gray-600 dark:text-gray-400">
+                {{- 'login.confirm.invalid.ipRecorded_{ip}'|trans({ip: app.request.clientIp}) -}}
+            </p>
+            <twig:Button href="{{ path('login_link', returnParameters) }}" full data-test-id="login-retry">
+                {{- 'login.confirm.getNewLink'|trans -}}
+            </twig:Button>
+        {% else %}
+            <p class="pb-4 text-lg text-gray-600 dark:text-gray-400">
+                {{- 'login.confirm.aboutToSignAs_{user}'|trans({user}) -}}
+            </p>
+            <p class="pb-8 text-sm text-gray-600 dark:text-gray-400">
+                {{- 'login.confirm.ipWillBeRecorded_{ip}'|trans({ip: app.request.clientIp}) -}}
+            </p>
+            {#- _top: the sign-in lands on a page that has no `login` frame. -#}
+            <form action="{{ path('login_link_check', returnParameters) }}" method="POST" data-turbo-frame="_top"
+                  {%- if autoSubmit %} {{ stimulus_controller('submit-on-connect') }}{% endif %}>
+                <input type="hidden" name="_token" value="{{ csrf_token('login-check') }}">
+                <input type="hidden" name="expires" value="{{ expires }}">
+                <input type="hidden" name="user" value="{{ user }}">
+                <input type="hidden" name="hash" value="{{ hash }}">
+
+                <twig:Button type="submit" full data-test-id="login-confirm">
+                    {{- 'shared.button.continue'|trans -}}
+                </twig:Button>
+            </form>
+        {% endif %}
+    </twig:Card:Body>
+{% endblock %}

@@ -1,0 +1,125 @@
+{
+	# Carries skip_install_trust everywhere except the dev image, which runs as root
+	# and lets Caddy add its CA to the container's trust stores ({@see Dockerfile}).
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+
+	pki {
+		ca local {
+			name "Local Development CA"
+			intermediate_lifetime 365d
+		}
+	}
+	servers {
+		protocols h1 h2 h3
+	}
+
+	metrics
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+(queryfilter) {
+	hash _jwt # SPA JWT
+	hash state # Azure SSO
+	hash code # Azure SSO
+	hash session_state # Azure SSO
+	hash hash # Magic Link
+	replace authorization REDACTED
+}
+
+{$SERVER_NAME:localhost} {
+	log {
+		{$CADDY_SERVER_LOG_OPTIONS}
+
+		format filter {
+			wrap json
+
+			# The CSP statement is quite verbose and not that interesting, so we're nog logging it.
+			fields {
+				resp_headers>X-Content-Security-Policy delete
+				resp_headers>Content-Security-Policy delete
+			}
+
+			request>uri query {
+				import queryfilter
+			}
+
+			resp_headers>Location query {
+				import queryfilter
+			}
+
+			request>headers>Referer query {
+				import queryfilter
+			}
+
+			request>headers>Cookie cookie {
+				hash app_SESSION
+			}
+		}
+	}
+
+	root /app/public
+	encode zstd br gzip
+
+	mercure {
+		# SERVER_NAME yields one server per address; a shared name makes them one hub.
+		name app
+		# The app signs its own tokens, so its URL is the issuer ({@see config/packages/mercure.yaml}).
+		issuer {$DEFAULT_URI} {
+			publisher {
+				jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+			}
+			subscriber {
+				jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+			}
+		}
+		# One audience for updates published through the internal MERCURE_URL too.
+		resource_identifier {$MERCURE_PUBLIC_URL}
+		# Enable the subscription API (double-check that it's what you want)
+		subscriptions
+		# Extra directives
+		{$MERCURE_EXTRA_DIRECTIVES}
+	}
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
+	header ?Permissions-Policy "browsing-topics=()"
+
+	# Go's MIME table has no .webmanifest entry, so file_server serves the manifest
+	# with no Content-Type at all and the browser discards it.
+	@webmanifest path *.webmanifest
+	header @webmanifest Content-Type application/manifest+json
+
+	@phpRoute {
+		not path /.well-known/mercure*
+		not file {path}
+	}
+	rewrite @phpRoute index.php
+
+	@frontController path index.php
+	php @frontController {
+		{$FRANKENPHP_SITE_CONFIG}
+
+		worker {
+			file ./public/index.php
+			{$FRANKENPHP_WORKER_CONFIG}
+		}
+	}
+
+	file_server {
+		hide *.php
+	}
+
+	tls internal {
+		on_demand
+	}
+}
+
+# Glob, so it is a no-op when the file is absent. compose.override.yaml mounts
+# the dev-only sites (Mailpit); the production image ships none.
+import /etc/frankenphp/sites-dev/*.caddyfile

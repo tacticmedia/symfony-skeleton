@@ -1,0 +1,69 @@
+.header {
+    /*background: #444;*/
+}
+
+.header .columns {
+    padding-bottom: 0;
+}
+
+.header p {
+    color: #ddd;
+    margin-bottom: 0;
+}
+
+.header .wrapper-inner {
+    padding: 10px; /*controls the height of the header*/
+}
+
+.header {
+    background: transparent;
+}
+
+.footer {
+    background: #444;
+}
+
+.footer p {
+    padding:0;
+    margin:0;
+    color:#eee;
+    font-size: 0.8rem;
+}
+
+.hangover {
+    background:transparent;
+}
+
+.hangover p {
+    font-size: 0.8rem;
+    margin:10px 0;
+}
+
+body {
+    background: #f3f3f3;
+}
+
+.wrapper.secondary {
+    background: #f3f3f3;
+}
+
+.container.body_alert {
+    border-top: 8px solid #ec5840;
+}
+
+.container.body_warning {
+    border-top: 8px solid #ffae00;
+}
+
+.container.body_default {
+    border-top: 8px solid #aaaaaa;
+}
+
+.action-url {
+    word-break: break-all;
+    font-family: monospace;
+    border:1px #ddd solid;
+    background:#eee;
+    padding:10px;
+    border-radius: 5px;
+}

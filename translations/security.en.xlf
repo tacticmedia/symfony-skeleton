@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="en">
+  <file id="security.en">
+    <unit id="LwbMgJC" name="account.closed">
+      <notes>
+        <note category="context">Sign-in refused: the account was closed.</note>
+      </notes>
+      <segment>
+        <source>account.closed</source>
+        <target>This account has been closed.</target>
+      </segment>
+    </unit>
+    <unit id="O7UCQh9" name="account.suspended">
+      <notes>
+        <note category="context">Sign-in refused: staff suspended this account.</note>
+      </notes>
+      <segment>
+        <source>account.suspended</source>
+        <target>This account is suspended.</target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

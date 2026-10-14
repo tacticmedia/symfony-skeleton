@@ -1,0 +1,19 @@
+{#
+    Every sign-in step renders inside the `login` turbo-frame. Steps fill login_title and login.
+#}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {%- set login_title -%}{% block login_title %}{% endblock %}{%- endset -%}
+    {%- set login -%}{% block login %}{% endblock %}{%- endset -%}
+    <div class="flex min-h-screen gap-4 flex-col justify-start px-6 py-12 text-gray-900 lg:px-8 dark:text-gray-100 bg-linear-to-br from-brand-yellow-500 to-brand-red-500 dark:from-brand-yellow-800 dark:to-brand-red-950">
+        <div class="w-full max-w-md mx-auto bg-white shadow-xl shadow-black/50 sm:rounded-lg dark:bg-black/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+            <turbo-frame id="login" data-test-id="login-frame" class="block">
+                <twig:Card:Header>
+                    <twig:Heading level="1" data-test-id="login-step-title">{{ login_title }}</twig:Heading>
+                </twig:Card:Header>
+                {{ login }}
+            </turbo-frame>
+        </div>
+    </div>
+{% endblock %}
