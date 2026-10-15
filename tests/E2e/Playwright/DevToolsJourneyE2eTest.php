@@ -20,11 +20,11 @@ final class DevToolsJourneyE2eTest extends JourneyTestCase
         $this->signIn(AppStory::ADMIN_EMAIL);
 
         $this->click('layout-toggle-translation');
-        $this->page->waitForFunction(JourneyScripts::textContains('[data-test-id="page-title"]', 'default.tailwindCheck'));
+        $this->waitUntil(JourneyScripts::textContains('[data-test-id="page-title"]', 'default.tailwindCheck'));
         $this->captureFullPageScreenshot('Home - Translation Keys');
 
         $this->click('layout-toggle-translation');
-        $this->page->waitForFunction('!'.JourneyScripts::textContains('[data-test-id="page-title"]', 'default.tailwindCheck'));
+        $this->waitUntil('!'.JourneyScripts::textContains('[data-test-id="page-title"]', 'default.tailwindCheck'));
 
         // Turbo Drive is on: a link click keeps the window.
         $this->page->evaluate(JourneyScripts::MARK_WINDOW);

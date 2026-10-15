@@ -21,6 +21,13 @@ parameters:
             message: '#database can contain string but property expects lowercase-string&non-empty-string#'
             paths:
                 - src/Entity/User.php
+        # Resets a flag Symfony leaves set across worker requests; no public API does it.
+        -
+            identifiers:
+                - classConstant.internalClass
+                - parameter.internalClass
+                - property.internalClass
+            path: src/Security/ProfilerCspResetter.php
 
     cognitive_complexity:
         class: 30

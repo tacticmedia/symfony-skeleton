@@ -51,7 +51,7 @@ Panther process uses chromedriver port 9515.
 | --- | --- |
 | `tests/E2e/Panther/JourneyTestCase.php` | Panther base class: client construction, sign-in, the interaction helpers. Uses `TacticMedia\QaBundle\Test\JourneyScreenshots`, root `var/screenshots/panther`. |
 | `tests/E2e/Playwright/JourneyTestCase.php` | Playwright base class, extends `Playwright\Testing\PlaywrightTestCase`: the same helpers on `$this->page`. Uses `TacticMedia\QaBundle\Test\PlaywrightJourneyScreenshots`, root `var/screenshots/playwright`. |
-| `tests/E2e/JourneyScripts.php` | Page scripts both drivers evaluate. Each is an expression, so Panther runs it after `return` and playwright-php evaluates it as it is. |
+| `tests/E2e/JourneyScripts.php` | Page scripts both drivers evaluate. Each is an expression, so Panther runs it after `return`, playwright-php evaluates it as it is, and the Playwright `waitUntil()` wraps it in an arrow function. |
 | `tests/E2e/ResetsE2eDatabase.php` | `loadFixture()`, used by both base classes. |
 | `tests/E2e/*/*E2eTest.php` | The journeys. |
 | `tests/Story/AppStory.php` | The `#[AsFixture]` story `main`: one admin, `AppStory::ADMIN_EMAIL` (`staff@tacticmedia.com.au`). |
@@ -229,7 +229,7 @@ Reuse these rather than reaching for the driver directly.
 | `signIn($client, $email)` | `signIn($email)` | The real sign-in through the dev shortcut, waiting until the path leaves `/login`. |
 | `requestLink($client, $email)` | `requestLink($email)` | Submit the sign-in form only, for a scene that checks the outcome itself. |
 | `click($client, $testId)` | `click($testId)` | Wait for the test id, then a native click. |
-| `waitUntil($client, $condition, $expectation, $seconds = 10)` | `$this->page->waitForFunction($condition)` | Wait for a `JourneyScripts` expression. Panther's fails with the page the browser sat on. |
+| `waitUntil($client, $condition, $expectation, $seconds = 10)` | `waitUntil($condition)` | Wait for a `JourneyScripts` expression. Panther's fails with the page the browser sat on. Playwright's passes an arrow function: Playwright evals a bare expression on every poll, and CSP blocks that eval. |
 | `$client->waitForVisibility($selector)` | `waitForTestId($testId)` | Wait for an element to show. |
 | `captureFullPageScreenshot($client, $label)` | `captureFullPageScreenshot($label)` | Fail a screen that repeats an `id` or `data-test-id`, then capture it. |
 
@@ -242,6 +242,8 @@ Reuse these rather than reaching for the driver directly.
 | `SIGN_IN_SETTLED` | The path no longer starts with `/login`. |
 | `MARK_WINDOW`, `WINDOW_MARKED` | Set a marker on `window`, then read it: Turbo Drive keeps the window between visits, a full page load does not. |
 | `textContains($selector, $text)` | The `innerText` of the first match contains the text. |
+| `MERCURE_BOXES_WHITE` | Both health check Mercure boxes are white, the colour before a run. |
+| `MERCURE_BOXES_COLOURED` | Both health check Mercure boxes share the colour of the last run. |
 
 ## House rules
 

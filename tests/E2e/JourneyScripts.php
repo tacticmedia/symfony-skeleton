@@ -6,7 +6,8 @@ namespace App\Tests\E2e;
 
 /**
  * Page scripts both journey drivers run. Each is an expression, so Panther runs it after
- * `return` and playwright-php evaluates it as it is.
+ * `return`, playwright-php evaluates it as it is, and the Playwright `waitUntil()` wraps it
+ * in an arrow function.
  */
 final class JourneyScripts
 {
@@ -46,6 +47,22 @@ final class JourneyScripts
      */
     public const string MARK_WINDOW = 'window.journeyMark = true';
     public const string WINDOW_MARKED = 'true === window.journeyMark';
+
+    /**
+     * Both health check Mercure boxes show white, the colour before a run. CSP leaves a blocked
+     * colour transparent.
+     */
+    public const string MERCURE_BOXES_WHITE = self::MERCURE_BOX_COLOURS.'.every(colour => "rgb(255, 255, 255)" === colour)';
+
+    /**
+     * Both health check Mercure boxes show the colour of the last run.
+     */
+    public const string MERCURE_BOXES_COLOURED = '(([response, target]) => response === target && !["rgba(0, 0, 0, 0)", "rgb(255, 255, 255)", null].includes(response))('.self::MERCURE_BOX_COLOURS.')';
+    private const string MERCURE_BOX_COLOURS = <<<'JS'
+        ['health-check-mercure-response', 'health-check-mercure-target']
+            .map(testId => document.querySelector(`[data-test-id="${testId}"]`))
+            .map(element => element && getComputedStyle(element).backgroundColor)
+        JS;
 
     public static function textContains(string $selector, string $text): string
     {

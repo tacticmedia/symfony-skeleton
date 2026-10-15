@@ -1,9 +1,11 @@
 <div aria-live="assertive" class="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 z-50">{#--#}
-    <div class="w-96 ml-auto flex flex-col-reverse items-center sm:items-end" data-test-id="layout-flashes">
-        {%- if app.request.hasPreviousSession and app.session.flashBag.peekAll is not empty -%}
+    <div class="w-96 ml-auto flex flex-col-reverse items-center sm:items-end" data-test-id="layout-flashes" {{ stimulus_controller('flash') }}>
+        a
+        {%- if app.session.flashBag.peekAll is not empty -%}
+            b
             {%- for type, messages in app.session.flashBag.all -%}
                 {%- for message in messages -%}
-                    <div class="{{ html_classes('mt-5 border max-w-sm w-full bg-white dark:bg-zinc-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden', {
+                    <div {{ stimulus_target('flash', 'message') }} class="{{ html_classes('mt-5 border max-w-sm w-full bg-white dark:bg-zinc-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden', {
                         'bg-red-200 dark:bg-red-900 text-red-900 dark:text-red-50 border-red-400 dark:border-red-700': type == 'error',
                         'bg-green-200 dark:bg-lime-900 text-green-900 dark:text-green-50 border-green-400 dark:border-green-700': type == 'success',
                     }) }}">
@@ -11,11 +13,11 @@
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
                                     {%- if type == 'success' -%}
-                                        [x]
+                                        <twig:ux:icon name="heroicons:check-circle" />
                                     {%- elseif type == 'error' -%}
-                                        [!]
+                                        <twig:ux:icon name="heroicons:exclamation-circle" />
                                     {%- else -%}
-                                        [i]
+                                        <twig:ux:icon name="heroicons:information-circle" />
                                     {%- endif -%}
                                 </div>
                                 <div class="ml-3 w-0 flex-1">

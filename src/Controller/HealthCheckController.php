@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Security\MercureAuthorizer;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,7 +52,7 @@ final class HealthCheckController extends AbstractController
                 $data = $this->renderView('_mercure/generic-update.stream.html.twig', [
                     'action' => 'replace',
                     'target' => 'mercure_target',
-                    'content' => '<div class="flex items-center justify-center" style="background:#'.$backgroundColor.'" id="mercure_target"><div class="bg-white text-black text-sm rounded-md p-2">Success '.(++$testMercureCounter).'</div></div>',
+                    'content' => '<div class="flex items-center justify-center" data-controller="background" data-background-color-value="#'.$backgroundColor.'" id="mercure_target" data-test-id="health-check-mercure-target"><div class="bg-white text-black text-sm rounded-md p-2">Success '.(++$testMercureCounter).'</div></div>',
                     'rawContent' => true,
                 ]);
 
@@ -62,8 +61,12 @@ final class HealthCheckController extends AbstractController
                     data: $data,
                     private: true,
                 ));
+
+                $this->addFlash('success', 'Update sent.');
             } catch (\Throwable $e) {
                 $mercureError = $e->getMessage();
+
+                $this->addFlash('error', $mercureError);
             }
         }
 
@@ -71,9 +74,9 @@ final class HealthCheckController extends AbstractController
 
         try {
             $user = $this->getUser();
-            if ($user instanceof User && $request->query->has('email')) {
+            if ($request->query->has('email')) {
                 $email = new TemplatedEmail()
-                    ->to(new Address($user->getUserIdentifier()))
+                    ->to(new Address($user?->getUserIdentifier() ?: 'foo@localhost'))
                     ->subject('E-mail test')
                     ->htmlTemplate('_emails/test.html.twig')
                     ->textTemplate('_emails/test.txt.twig')
