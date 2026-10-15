@@ -59,5 +59,7 @@ return RectorConfig::configure()
         Rector\Naming\Rector\ClassMethod\RenameVariableToMatchNewTypeRector::class,
         // The access inspector fixtures exist only to carry attributes on empty actions.
         Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector::class => [__DIR__.'/tests/Functional/Security/Fixture'],
+        // bin/console importmap:require rewrites the file from a template without strict_types.
+        Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector::class => [__DIR__.'/importmap.php'],
     ])
 ;

@@ -45,6 +45,17 @@ final class HealthCheckControllerTest extends AppWebTestCase
         self::assertSelectorTextSame('section[aria-labelledby="health-check-email-heading"] h2#health-check-email-heading', 'E-mail delivery');
     }
 
+    #[TestDox('A Mercure run publishes the update, flashes that it was sent and offers the next run')]
+    public function testTheMercureRunFlashesSent(): void
+    {
+        $client = self::createClient();
+
+        $client->request('GET', '/health-check/functional?testMercure=1&testMercureCounter=0');
+
+        self::assertSelectorTextContains('[data-test-id="layout-flashes"]', 'healthCheck.mercure.sent');
+        self::assertSelectorTextSame('[data-test-id="health-check-mercure-run"]', 'Run test #2');
+    }
+
     #[TestDox('A signed-in user receives the test email at their address')]
     public function testTheEmailTestMailsTheSignedInUser(): void
     {

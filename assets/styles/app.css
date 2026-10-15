@@ -34,6 +34,8 @@
     --color-brand-red-950: #460c09;
 }
 
-.button-primary {
-    @apply border rounded-md inline-block px-2 py-1;
+@layer components {
+    .button-primary {
+        @apply border rounded-md inline-block px-2 py-1;
+    }
 }

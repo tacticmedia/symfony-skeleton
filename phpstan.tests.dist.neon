@@ -10,6 +10,11 @@ parameters:
         - vendor/autoload.php
     paths:
         - tests
+    ignoreErrors:
+        # Drives the profiler CSP handler that App\Security\ProfilerCspResetter resets; no public API does it.
+        -
+            identifier: method.internalClass
+            path: tests/Functional/Security/ProfilerCspResetterTest.php
 
     cognitive_complexity:
         class: 30

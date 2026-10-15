@@ -171,6 +171,25 @@
         <target>Remember Me</target>
       </segment>
     </unit>
+    <unit id="sL5DTl5" name="healthCheck.mercure.failed_{error}">
+      <notes>
+        <note category="context">Functional health check, flash message: publishing the test update to the Mercure hub failed.</note>
+        <note category="placeholders">{error}: the error the Mercure client reported, in English.</note>
+      </notes>
+      <segment>
+        <source>healthCheck.mercure.failed_{error}</source>
+        <target>The update was not sent: {error}</target>
+      </segment>
+    </unit>
+    <unit id="D1wHyER" name="healthCheck.mercure.sent">
+      <notes>
+        <note category="context">Functional health check, flash message: the test update reached the Mercure hub.</note>
+      </notes>
+      <segment>
+        <source>healthCheck.mercure.sent</source>
+        <target>Update sent.</target>
+      </segment>
+    </unit>
     <unit id="TEoXPxO" name="login.confirm.aboutToSignAs_{user}">
       <notes>
         <note category="context">Page that confirms a sign-in link, above the Continue button.</note>

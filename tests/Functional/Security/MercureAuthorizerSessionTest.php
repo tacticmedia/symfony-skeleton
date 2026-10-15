@@ -43,6 +43,16 @@ final class MercureAuthorizerSessionTest extends KernelTestCase
         self::assertNull($request->attributes->get('_mercure_authorization_cookies'));
     }
 
+    #[TestDox('A response does not start a session that nothing else started')]
+    public function testResponseLeavesAnUnstartedSessionAlone(): void
+    {
+        $request = $this->mainRequest();
+
+        self::getContainer()->get(MercureAuthorizer::class)->onKernelResponse();
+
+        self::assertFalse($request->getSession()->isStarted());
+    }
+
     private function mainRequest(): Request
     {
         $request = Request::create('https://localhost/');

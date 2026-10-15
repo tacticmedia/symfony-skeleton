@@ -57,10 +57,7 @@ class MercureAuthorizer
             return;
         }
 
-        $topics = array_unique(array_filter([
-            ...($this->getSession()?->get('_mercure_topics') ?: []),
-            ...$this->topicsAuthorisedOnce,
-        ]));
+        $topics = array_unique(array_filter([...$this->startedSessionTopics(), ...$this->topicsAuthorisedOnce]));
 
         try {
             if ([] !== $topics) {
@@ -86,7 +83,19 @@ class MercureAuthorizer
     }
 
     /**
-     * Get the main request IF it exists and IF the session is started.
+     * Reading a session starts it, and a request still carrying the pre-sign-in cookie would then clear the new one.
+     *
+     * @return array<string>
+     */
+    private function startedSessionTopics(): array
+    {
+        $session = $this->getSession();
+
+        return $session?->isStarted() ? ($session->get('_mercure_topics') ?: []) : [];
+    }
+
+    /**
+     * The main request's session, if a listener created it. It is not necessarily started.
      */
     private function getSession(): ?SessionInterface
     {

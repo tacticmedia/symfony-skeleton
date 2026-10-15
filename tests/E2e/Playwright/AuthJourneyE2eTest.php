@@ -23,7 +23,7 @@ final class AuthJourneyE2eTest extends JourneyTestCase
         $this->captureFullPageScreenshot('Home - Signed Out');
 
         $this->click('default-sign-in');
-        $this->page->waitForFunction(JourneyScripts::LOGIN_FORM_READY);
+        $this->waitUntil(JourneyScripts::LOGIN_FORM_READY);
         $this->captureFullPageScreenshot('Sign In');
 
         // The browser accepts an address without a dotted domain; the server does not.
@@ -44,7 +44,7 @@ final class AuthJourneyE2eTest extends JourneyTestCase
 
         // Remember Me restores the address on this device.
         $this->page->goto('/login');
-        $this->page->waitForFunction(JourneyScripts::LOGIN_FORM_READY);
+        $this->waitUntil(JourneyScripts::LOGIN_FORM_READY);
         self::assertSame(AppStory::ADMIN_EMAIL, $this->page->locator('#login_form_email')->inputValue());
         self::assertTrue($this->page->locator('#login_form_remember')->isChecked());
 
@@ -55,7 +55,7 @@ final class AuthJourneyE2eTest extends JourneyTestCase
 
         // Signing out sends Clear-Site-Data, which also forgets the remembered address.
         $this->click('logout-sign-in');
-        $this->page->waitForFunction(JourneyScripts::LOGIN_FORM_READY);
+        $this->waitUntil(JourneyScripts::LOGIN_FORM_READY);
         self::assertSame('', $this->page->locator('#login_form_email')->inputValue());
     }
 

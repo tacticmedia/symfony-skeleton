@@ -122,7 +122,8 @@ many languages make adjectives and participles agree with their noun.
 `<area>.<context>.<element>`
 
 - **Area**: an entity in `App\Entity`, in lower camelCase (`user`), or a feature with no entity. The
-  features are the `FEATURES` list in `CatalogueKeyRules`: `default`, `layout`, `login`, `logout`.
+  features are the `FEATURES` list in `CatalogueKeyRules`: `default`, `healthCheck`, `layout`,
+  `login`, `logout`.
   A new feature area goes into that list. `layout` is the page shell: navigation, footer, banners,
   toggles.
 - **Context**: the screen, named after its template or action, such as `request`, `sent` or

@@ -12,7 +12,7 @@ use App\I18n\TranslatableNounInterface;
  */
 final readonly class CatalogueKeyRules
 {
-    private const array FEATURES = ['default', 'layout', 'login', 'logout'];
+    private const array FEATURES = ['default', 'healthCheck', 'layout', 'login', 'logout'];
     private const string ENTITY_FIELD_PARTS = 'label|help|placeholder';
     private const string FORM_FIELD_PARTS = '\w+\.(?:label|help|placeholder)|\w+\.choice\.\w+';
 

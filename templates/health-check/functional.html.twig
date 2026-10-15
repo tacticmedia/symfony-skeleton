@@ -13,7 +13,7 @@
                 {{ turbo_stream_from('functional_health_check') }}
                 <div class="gap-4 grid grid-cols-2 p-4 bg-gray-50 dark:bg-zinc-700/25 rounded p-4 border border-gray-100 dark:border-white/10 text-center">
                     <turbo-frame id="functional_health_check_turbo_frame">
-                        <div class="relative flex flex-column gap-4 min-h-32 items-center justify-center" style="background:#{{ backgroundColor }}" nonce="{{ csp_nonce('style') }}">
+                        <div class="relative flex flex-column gap-4 min-h-32 items-center justify-center" {{ stimulus_controller('background', {color: '#' ~ backgroundColor}) }} data-test-id="health-check-mercure-response">
                             <span>
                                 <a href="{{ path('health_check_functional', {
                                     testMercure: true,
@@ -25,7 +25,7 @@
                             {% endif %}
                         </div>
                     </turbo-frame>
-                    <div class="flex items-center justify-center" style="background:#{{ backgroundColor }}" {# nonce="{{ csp_nonce('style') }}" #} id="mercure_target" data-test-id="health-check-mercure-target">
+                    <div class="flex items-center justify-center" {{ stimulus_controller('background', {color: '#' ~ backgroundColor}) }} id="mercure_target" data-test-id="health-check-mercure-target">
                         <twig:Badge>Awaiting Mercure Message</twig:Badge>
                     </div>
                     <div class="col-span-full text-left text-sm text-gray-500 dark:text-gray-400">The left box is driven by a server response, the other is driven by a Turbo Stream message coming through.</div>
