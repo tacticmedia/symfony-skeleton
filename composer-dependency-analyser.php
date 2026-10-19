@@ -20,6 +20,7 @@ return new Configuration()
         'tacticmedia/qa-bundle',
         'zenstruck/foundry',
     ], [__DIR__.'/config/bundles.php'], [ErrorType::DEV_DEPENDENCY_IN_PROD])
+    ->ignoreErrorsOnPackageAndPath('symfony/web-profiler-bundle', __DIR__.'/src/Security/ProfilerCspResetter.php', [ErrorType::DEV_DEPENDENCY_IN_PROD])
     // Used through configuration, templates, Composer plugins or the image build.
     ->ignoreErrorsOnPackages([
         'league/commonmark', // markdown_to_html

@@ -2,7 +2,7 @@ twig:
     file_name_pattern: '*.twig'
     globals:
         app_release: '%env(APP_RELEASE)%'
-        sentry_dsn: '%env(SENTRY_FRONTEND_DSN)%'
+        sentry_dsn: '%env(SENTRY_DSN_FRONTEND)%'
         sentry_environment: '%env(SENTRY_ENVIRONMENT)%'
     form_themes:
         - 'tailwind_2_layout.html.twig'

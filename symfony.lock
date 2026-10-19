@@ -316,7 +316,7 @@
             "assets/controllers.json",
             "assets/controllers/csrf_protection_controller.js",
             "assets/controllers/hello_controller.js",
-            "assets/stimulus_bootstrap.js"
+            "assets/stimulus.js"
         ]
     },
     "symfony/translation": {

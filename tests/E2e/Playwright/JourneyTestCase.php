@@ -64,7 +64,7 @@ abstract class JourneyTestCase extends PlaywrightTestCase
     protected function signIn(string $email): void
     {
         $this->requestLink($email);
-        $this->page->waitForFunction(JourneyScripts::SIGN_IN_SETTLED);
+        $this->waitUntil(JourneyScripts::SIGN_IN_SETTLED);
     }
 
     protected function requestLink(string $email): void
@@ -73,9 +73,17 @@ abstract class JourneyTestCase extends PlaywrightTestCase
             $this->page->goto('/login');
         }
 
-        $this->page->waitForFunction(JourneyScripts::LOGIN_FORM_READY);
+        $this->waitUntil(JourneyScripts::LOGIN_FORM_READY);
         $this->page->locator('#login_form_email')->fill($email);
         $this->click('login-request');
+    }
+
+    /**
+     * Playwright evals an expression on every poll, which CSP blocks; it evals a function once.
+     */
+    protected function waitUntil(string $condition): void
+    {
+        $this->page->waitForFunction('() => '.$condition);
     }
 
     protected function click(string $testId): void

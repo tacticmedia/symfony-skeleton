@@ -1,20 +1,82 @@
 nelmio_security:
-    # prevents framing of the entire site
     clickjacking:
         paths:
             '^/.*': DENY
 
-    # disables content type sniffing for script resources
+    external_redirects:
+        abort: true
+        log: true
+
+    csp:
+        hosts: []
+        content_types: []
+        enforce:
+            level1_fallback: false
+            browser_adaptive:
+                enabled: false
+            default-src:
+                - 'self'
+            # Neither base-uri nor form-action falls back to default-src. Without
+            # base-uri an injected <base> retargets the nonce-carrying importmap
+            # modules, which is the standard bypass for strict-dynamic.
+            base-uri:
+                - 'self'
+            form-action:
+                - 'self'
+            frame-ancestors:
+                - 'none'
+            script-src:
+                - 'self'
+                - 'strict-dynamic'
+                - 'https://edge.fullstory.com'
+            connect-src:
+                - 'self'
+                - 'https://edge.fullstory.com'
+                - 'https://rs.fullstory.com'
+            # blob: lets the dropzone controller show local-file thumbnails
+            # (URL.createObjectURL) before upload; it cannot load remote content.
+            img-src:
+                - 'self'
+                - 'data:'
+                - 'blob:'
+
     content_type:
         nosniff: true
 
-    # Send a full URL in the `Referer` header when performing a same-origin request,
-    # only send the origin of the document to secure destination (HTTPS->HTTPS),
-    # and send no header to a less secure destination (HTTPS->HTTP).
-    # If `strict-origin-when-cross-origin` is not supported, use `no-referrer` policy,
-    # no referrer information is sent along with requests.
     referrer_policy:
         enabled: true
         policies:
             - 'no-referrer'
             - 'strict-origin-when-cross-origin'
+
+    permissions_policy:
+        enabled: true
+        policies:
+            camera: []
+            microphone: []
+            geolocation: []
+            accelerometer: []
+            gyroscope: []
+            magnetometer: []
+            interest_cohort: []
+            payment: ['self']
+            publickey_credentials_get: ['self']
+            publickey_credentials_create: ['self']
+            fullscreen: ['self']
+            picture_in_picture: ['self']
+            autoplay: []
+
+    cross_origin_isolation:
+        enabled: true
+        paths:
+            '^/.*':
+                coep: require-corp
+                coop: same-origin
+                corp: same-origin
+
+when@prod:
+    nelmio_security:
+        forced_ssl:
+            hsts_max_age: 31536000
+            hsts_subdomains: true
+            hsts_preload: false

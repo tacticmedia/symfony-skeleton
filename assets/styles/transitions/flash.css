@@ -1,0 +1,28 @@
+@layer components {
+    /**
+     * Flash message fade in and out
+     */
+    .transition-flash-enter {
+        @apply transform ease-out duration-300 transition;
+    }
+
+    .transition-flash-enter-start {
+        @apply opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2;
+    }
+
+    .transition-flash-enter-end {
+        @apply opacity-100 translate-y-0 sm:translate-x-0;
+    }
+
+    .transition-flash-leave {
+        @apply transition ease-in duration-100;
+    }
+
+    .transition-flash-leave-start {
+        @apply transform opacity-100  translate-y-0 sm:translate-x-0;
+    }
+
+    .transition-flash-leave-end {
+        @apply transform opacity-0 -translate-x-full sm:translate-y-0 sm:-translate-x-full;
+    }
+}

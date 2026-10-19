@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Returns the importmap for this application.
  *
@@ -29,4 +27,21 @@ return [
     '@hotwired/stimulus' => ['version' => '3.2.2'],
     '@symfony/stimulus-bundle' => ['path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js'],
     '@hotwired/turbo' => ['version' => '8.0.23'],
+    '@fullstory/browser' => ['version' => '2.1.2'],
+    '@sentry/browser' => ['version' => '11.8.0'],
+    '@sentry/tracing' => ['version' => '7.120.4'],
+    '@sentry/integrations' => ['version' => '7.114.0'],
+    '@fullstory/snippet' => ['version' => '2.1.0'],
+    '@sentry/feedback' => ['version' => '11.8.0'],
+    '@sentry/core' => ['version' => '7.114.0'],
+    '@sentry/browser-utils' => ['version' => '11.8.0'],
+    '@sentry/conventions/attributes' => ['version' => '0.27.0'],
+    '@sentry/replay' => ['version' => '11.8.0'],
+    '@sentry/replay-canvas' => ['version' => '11.8.0'],
+    '@sentry/core/browser' => ['version' => '11.8.0'],
+    '@sentry/conventions/op' => ['version' => '0.27.0'],
+    '@sentry-internal/tracing' => ['version' => '7.120.4'],
+    '@sentry/utils' => ['version' => '7.114.0'],
+    'localforage' => ['version' => '1.10.0'],
+    'web-vitals' => ['version' => '6.2.3'],
 ];
