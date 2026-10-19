@@ -44,4 +44,13 @@ parameters:
             message: 'locate the element by its data-test-id, see docs/test-ids.md'
 
 includes:
-    - phar://vendor/phpstan/phpstan/phpstan.phar/conf/bleedingEdge.neon
+    - vendor/composer/pcre/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/rules.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/spaze/phpstan-disallowed-calls/extension.neon
+    - vendor/tomasvotruba/cognitive-complexity/config/extension.neon
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon

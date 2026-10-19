@@ -44,6 +44,13 @@ parameters:
                     typeString: 'Symfony\Contracts\Translation\TranslatableInterface'
 
 includes:
-    # The phar path, not vendor/phpstan/phpstan/conf/: that file includes phar://phpstan.phar/,
-    # an alias only the phpstan binary registers, so Rector cannot load it.
-    - phar://vendor/phpstan/phpstan/phpstan.phar/conf/bleedingEdge.neon
+    - vendor/composer/pcre/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/rules.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/spaze/phpstan-disallowed-calls/extension.neon
+    - vendor/tomasvotruba/cognitive-complexity/config/extension.neon
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use PHPStan\ExtensionInstaller\GeneratedConfig;
 use Rector\CodingStyle\Rector\ClassLike\NewlineBetweenClassLikeStmtsRector;
 use Rector\Config\RectorConfig;
 use Rector\Naming\Rector\Class_\RenamePropertyToMatchTypeRector;
@@ -10,20 +9,21 @@ use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByMethodCallTypeRector;
 
-// Rector's PHPStan container skips phpstan/extension-installer; pass the extensions it
-// discovered, resolved as PHPStan's CommandHelper resolves them.
-$extensionInstallerDirectory = dirname((string) new ReflectionClass(GeneratedConfig::class)->getFileName());
-$phpstanExtensionConfigs = [];
-foreach (GeneratedConfig::EXTENSIONS as $extension) {
-    foreach ($extension['extra']['includes'] ?? [] as $include) {
-        $phpstanExtensionConfigs[] = $extensionInstallerDirectory.'/'.$extension['relative_install_path'].'/'.$include;
-    }
-}
+// conf/bleedingEdge.neon includes phar://phpstan.phar/, an alias only the phpstan binary registers.
+Phar::loadPhar(__DIR__.'/vendor/phpstan/phpstan/phpstan.phar', 'phpstan.phar');
 
 return RectorConfig::configure()
     ->withParallel()
+    ->withMemoryLimit('-1')
+    ->withCache(
+        cacheDirectory: __DIR__.'/var/cache/rector',
+        cacheClass: \Rector\Caching\ValueObject\Storage\FileCacheStorage::class,
+        containerCacheDirectory: __DIR__.'/var/cache/dev',
+    )
     ->withSymfonyContainerPhp(__DIR__.'/var/cache/dev/App_KernelDevDebugContainer.php')
-    ->withPHPStanConfigs([__DIR__.'/phpstan.dist.neon', ...$phpstanExtensionConfigs])
+    ->withPHPStanConfigs([
+        __DIR__.'/phpstan.dist.neon'
+    ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
@@ -39,7 +39,7 @@ return RectorConfig::configure()
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->withSkipPath('src/Kernel.php')
+    ->withSkipPath(__DIR__.'/src/Kernel.php')
     ->withRootFiles()
     ->withComposerBased(
         twig: true,

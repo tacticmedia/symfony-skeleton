@@ -36,3 +36,4 @@ phpstan.neon
 /assets/vendor/
 ###< symfony/asset-mapper ###
 /config/reference.php
+/.idea/skeleton.iml
