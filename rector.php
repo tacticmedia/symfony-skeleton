@@ -17,12 +17,12 @@ return RectorConfig::configure()
     ->withMemoryLimit('-1')
     ->withCache(
         cacheDirectory: __DIR__.'/var/cache/rector',
-        cacheClass: \Rector\Caching\ValueObject\Storage\FileCacheStorage::class,
+        cacheClass: Rector\Caching\ValueObject\Storage\FileCacheStorage::class,
         containerCacheDirectory: __DIR__.'/var/cache/dev',
     )
     ->withSymfonyContainerPhp(__DIR__.'/var/cache/dev/App_KernelDevDebugContainer.php')
     ->withPHPStanConfigs([
-        __DIR__.'/phpstan.dist.neon'
+        __DIR__.'/phpstan.dist.neon',
     ])
     ->withPreparedSets(
         deadCode: true,

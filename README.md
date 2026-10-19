@@ -4,7 +4,7 @@ A Symfony 8.1 starter kit on PHP 8.5, FrankenPHP and PostgreSQL.
 
 ## Features
 
-1. **Docker development stack.** FrankenPHP with HTTPS on https://localhost, PostgreSQL, Mailpit
+1. **Docker development stack.** FrankenPHP/ with HTTPS on https://localhost, PostgreSQL, Mailpit
    at https://localhost:8025, a Tailwind watcher, a Messenger worker and a cron runner. See
    [docs/tls.md](docs/tls.md).
 2. **Passwordless sign-in.** Single-use magic links with rate limits, return targets, account
