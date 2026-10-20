@@ -15,6 +15,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  # Nobody reads the build record, and under act its upload retries until it fails.
+  DOCKER_BUILD_RECORD_UPLOAD: false
+
 jobs:
   qa:
     name: QA
@@ -90,6 +94,8 @@ jobs:
           pull: true
           load: true
           source: .
+          # Every dev service runs the image of `php` (compose.override.yaml).
+          targets: php
           files: |
             compose.yaml
             compose.override.yaml
@@ -144,8 +150,37 @@ jobs:
           # The default context is the remote git repository, not the checkout.
           context: .
           target: frankenphp_prod
+          load: true
+          tags: app-php-prod
           cache-from: type=gha,scope=prod
           cache-to: type=gha,scope=prod,mode=max
+      # The variables a deploy must set, as compose.yaml sets them for the php service.
+      - name: Start the production image beside PostgreSQL
+        run: |
+          docker network create prod
+          docker run --detach --name database --network prod \
+            --env POSTGRES_DB=app --env POSTGRES_USER=app --env POSTGRES_PASSWORD=app \
+            postgres:18-alpine
+          docker run --detach --name app --network prod --publish 443:443 \
+            --env APP_SECRET=ci-app-secret \
+            --env DATABASE_HOST=database \
+            --env DEFAULT_URI=https://localhost \
+            --env MERCURE_PUBLIC_URL=https://localhost/.well-known/mercure \
+            --env MERCURE_JWT_SECRET=ci-mercure-jwt-key-of-at-least-32-bytes \
+            --env MERCURE_PUBLISHER_JWT_KEY=ci-mercure-jwt-key-of-at-least-32-bytes \
+            --env MERCURE_SUBSCRIBER_JWT_KEY=ci-mercure-jwt-key-of-at-least-32-bytes \
+            app-php-prod
+      # The retries cover the entrypoint's wait for the database and the migrations.
+      - name: Check the pages answer
+        run: |
+          curl --fail --silent --show-error --insecure --output /dev/null \
+            --retry 30 --retry-delay 2 --retry-all-errors https://localhost/health-check
+          curl --fail --silent --show-error --insecure --output /dev/null https://localhost/login
+      - name: Check the entrypoint ran the migrations
+        run: docker exec app php bin/console doctrine:migrations:up-to-date
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs app
   panther:
     name: Panther journeys
     runs-on: ubuntu-latest
@@ -169,6 +204,8 @@ jobs:
           pull: true
           load: true
           source: .
+          # Every dev service runs the image of `php` (compose.override.yaml).
+          targets: php
           files: |
             compose.yaml
             compose.override.yaml
@@ -231,6 +268,8 @@ jobs:
           pull: true
           load: true
           source: .
+          # Every dev service runs the image of `php` (compose.override.yaml).
+          targets: php
           files: |
             compose.yaml
             compose.override.yaml

@@ -1,13 +1,24 @@
 #syntax=docker/dockerfile:1
 
-# Versions
 # 1.13 is the first release with Mercure 1.0, which the Caddyfile `issuer` blocks need.
-FROM dunglas/frankenphp:1.13-php8.5-trixie AS frankenphp_upstream
+FROM dunglas/frankenphp:1.13-php8.5-trixie@sha256:4a8eebee6b3bed92d01ffa6ec5b1bc2cb9c2ab7eeb546027a3f7e6a52937ebbb AS frankenphp_upstream
 
-# The different stages of this Dockerfile are meant to be built into separate images
-# https://docs.docker.com/build/building/multi-stage/#stop-at-a-specific-build-stage
-# https://docs.docker.com/reference/compose-file/build/#target
+# Static Go binary driving the `cron` compose service. A version bump changes both checksums.
+FROM scratch AS supercronic_amd64
+ADD --checksum=sha256:d2d7c97fbfefc763d5bbcbbb3f8d61f9dd3410ce5d05a737c414994b80b8cdd0 --chmod=755 \
+    https://github.com/aptible/supercronic/releases/download/v0.2.50/supercronic-linux-amd64 /supercronic
 
+FROM scratch AS supercronic_arm64
+ADD --checksum=sha256:a1c0af9872e8de89a1ce5c1b596e26c42917d5a2cf914d98faee2e28156899e2 --chmod=755 \
+    https://github.com/aptible/supercronic/releases/download/v0.2.50/supercronic-linux-arm64 /supercronic
+
+FROM supercronic_${TARGETARCH} AS supercronic
+
+# Edited more often than the packages change, so the dev and prod images add these last.
+FROM scratch AS frankenphp_files
+COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link --from=supercronic /supercronic /usr/local/bin/supercronic
+COPY --link frankenphp/Caddyfile frankenphp/crontab /etc/frankenphp/
 
 # Base FrankenPHP image
 FROM frankenphp_upstream AS frankenphp_base
@@ -43,33 +54,12 @@ ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 ENV CADDY_GLOBAL_OPTIONS=skip_install_trust
 
 ###> recipes ###
-###> symfony/panther ###
-# Chromium and ChromeDriver
-ENV PANTHER_NO_SANDBOX=1
-# Not mandatory, but recommended
-ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver && rm -rf /var/lib/apt/lists/*
-###< symfony/panther ###
 ###> doctrine/doctrine-bundle ###
 RUN install-php-extensions pdo_pgsql
 ###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
 COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
-COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
-
-# Static Go binary driving the `cron` compose service.
-ARG TARGETARCH
-ARG SUPERCRONIC_VERSION=v0.2.49
-ADD --chmod=755 https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH} /usr/local/bin/supercronic
-COPY --link frankenphp/crontab /etc/frankenphp/crontab
-
-ENTRYPOINT ["docker-entrypoint"]
-
-HEALTHCHECK --start-period=60s CMD php -r 'exit(false === @file_get_contents("http://localhost:2019/metrics", context: stream_context_create(["http" => ["timeout" => 5]])) ? 1 : 0);'
-CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
 
 # Dev FrankenPHP image
 FROM frankenphp_base AS frankenphp_dev
@@ -81,6 +71,15 @@ ENV FRANKENPHP_WORKER_CONFIG=watch
 # the NSS database Chromium reads. The container's own browser then trusts https://php,
 # so the e2e journeys are not restricted to plain HTTP.
 ENV CADDY_GLOBAL_OPTIONS=""
+
+###> symfony/panther ###
+# Chromium and ChromeDriver
+ENV PANTHER_NO_SANDBOX=1
+# Not mandatory, but recommended
+ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver && rm -rf /var/lib/apt/lists/*
+###< symfony/panther ###
 
 # dev dependencies
 RUN <<-EOF
@@ -102,7 +101,11 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 # The entrypoint calls these when present, which is only ever in this image.
 COPY --link --chmod=755 frankenphp/adopt-unversioned-schema.sh /usr/local/bin/adopt-unversioned-schema
 COPY --link --chmod=755 frankenphp/trust-local-ca.sh /usr/local/bin/trust-local-ca
+COPY --link --from=frankenphp_files / /
 
+ENTRYPOINT ["docker-entrypoint"]
+
+HEALTHCHECK --start-period=60s CMD php -r 'exit(false === @file_get_contents("http://localhost:2019/metrics", context: stream_context_create(["http" => ["timeout" => 5]])) ? 1 : 0);'
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch" ]
 
 # Builder for the prod FrankenPHP image
@@ -128,26 +131,16 @@ RUN <<-EOF
     php vendor/symfony/intl/Resources/bin/compress
     composer dump-env prod
     composer run-script --no-dev post-install-cmd
-    php bin/console tailwind:build
+    php bin/console tailwind:build --minify
     php bin/console asset-map:compile
-    chmod +x bin/console
-    sync
 EOF
 
-# Collect shared libraries needed by FrankenPHP and PHP extensions
-# hadolint ignore=DL3008,SC3054,DL4006
+# The shared libraries FrankenPHP, PHP and the extensions load. The prod stage starts from plain Debian.
 RUN <<-'EOF'
-    apt-get update
-    apt-get install -y --no-install-recommends libtree
-    mkdir -p /tmp/libs
-    BINARIES=(frankenphp php)
-    for target in $(printf '%s\n' "${BINARIES[@]}" | xargs -I{} which {}) \
-        $(find "$(php -r 'echo ini_get("extension_dir");')" -maxdepth 2 -name "*.so"); do
-        libtree -pv "$target" 2>/dev/null | grep -oP '(?:── )\K/\S+(?= \[)' | while IFS= read -r lib; do
-            [ -f "$lib" ] && cp -n "$lib" /tmp/libs/
-        done
-    done
-    rm -rf /var/lib/apt/lists/*
+    mkdir /tmp/libs
+    for target in /usr/local/bin/frankenphp /usr/local/bin/php "$(php -r 'echo ini_get("extension_dir");')"/*.so; do
+        ldd "$target"
+    done | awk '$3 ~ /^\// {print $3}' | sort -u | while read -r lib; do cp --update=none "$lib" /tmp/libs/; done
 EOF
 
 # The complete file tree of the prod image, an allow-list, so the prod stage copies it in one layer.
@@ -156,23 +149,20 @@ RUN <<-'EOF'
     mkdir -p $rootfs/app/assets $rootfs/app/bin $rootfs/app/var \
         $rootfs/usr/local/bin $rootfs/usr/local/lib/php $rootfs/usr/local/etc/php \
         $rootfs/usr/lib $rootfs/usr/share \
-        $rootfs/etc/frankenphp $rootfs/etc/ssl/certs \
+        $rootfs/etc/ssl/certs \
         $rootfs/data/caddy $rootfs/config/caddy
 
-    # Kernel::getProjectDir() locates the project by composer.json.
-    cp -a composer.json .env.local.php config migrations public src templates translations vendor $rootfs/app/
-    rm $rootfs/app/config/reference.php
+    # Kernel::getProjectDir() locates the project by composer.json. The entrypoint reads .env.
+    cp -a composer.json .env .env.local.php config migrations public src templates translations vendor $rootfs/app/
     cp -a bin/console $rootfs/app/bin/
     # Read at run time: the email stylesheets (@email in twig.yaml) and the UX icons.
     cp -a assets/email assets/icons $rootfs/app/assets/
     cp -a var/cache var/log var/share $rootfs/app/var/
 
-    cp -a /usr/local/bin/frankenphp /usr/local/bin/php /usr/local/bin/docker-php-entrypoint \
-        /usr/local/bin/docker-entrypoint /usr/local/bin/supercronic $rootfs/usr/local/bin/
+    cp -a /usr/local/bin/frankenphp /usr/local/bin/php /usr/local/bin/docker-php-entrypoint $rootfs/usr/local/bin/
     cp -a /usr/local/lib/php/extensions $rootfs/usr/local/lib/php/
     cp -a /usr/local/etc/php/conf.d /usr/local/etc/php/php.ini /usr/local/etc/php/app.conf.d $rootfs/usr/local/etc/php/
     cp -a /tmp/libs/. $rootfs/usr/lib/
-    cp -a /etc/frankenphp/Caddyfile /etc/frankenphp/crontab $rootfs/etc/frankenphp/
     # Go's time package needs zoneinfo for the crontab's CRON_TZ; slim ships no tzdata.
     cp -a /usr/share/zoneinfo $rootfs/usr/share/
     # CA certificates for TLS. MIME type detection uses ext-fileinfo, so no `file` binary.
@@ -186,7 +176,7 @@ RUN <<-'EOF'
 EOF
 
 # Prod FrankenPHP image
-FROM debian:13-slim AS frankenphp_prod
+FROM debian:13-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS frankenphp_prod
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
@@ -200,6 +190,7 @@ ENV CADDY_GLOBAL_OPTIONS=skip_install_trust
 RUN find / -xdev -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
 
 COPY --link --from=frankenphp_prod_builder /rootfs /
+COPY --link --from=frankenphp_files / /
 
 USER www-data
 

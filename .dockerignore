@@ -17,9 +17,14 @@
 **/Thumbs.db
 .claude/
 .component-slop-audit-for-symfony/
+.github/
 .idea/
+assets/vendor/
+docs/
+frankenphp/pki/
 public/assets/
 public/bundles/
+test-failures/
 tests/
 var/
 vendor/
@@ -28,3 +33,9 @@ vendor/
 .env.local
 .env.local.php
 .env.test
+.php-cs-fixer.php
+config/reference.php
+config/secrets/prod/prod.decrypt.private.php
+Makefile
+phpstan.neon
+phpunit.xml

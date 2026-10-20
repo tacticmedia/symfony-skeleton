@@ -7,7 +7,7 @@ manual dispatch run all five.
 | --- | --- | --- |
 | `qa` | `ubuntu-latest` with setup-php | actionlint over `.github/workflows/`, `composer audit`, then the composer scripts `lint`, `dependencies`, `rector:check`, `cs:check` and `stan`. The PHP extensions come from the `ext-*` entries of `composer.json`. |
 | `tests` | the compose stack | `curl` checks of the app and the Mercure hub, `tailwind:build`, the `test` database and its migrations, `composer test` and `doctrine:schema:validate` inside the `php` service, built from `compose.yaml` and `compose.override.yaml`. |
-| `production-image` | buildx | Builds the `frankenphp_prod` target, which deploys use and no other job builds. |
+| `production-image` | buildx | Builds the `frankenphp_prod` target, which deploys use and no other job builds. Starts it beside PostgreSQL with the variables a deploy must set, then checks that `/health-check` and `/login` answer and that the entrypoint ran the migrations. |
 | `panther` | the compose stack | The Panther journeys, after Tests ([End-to-end journeys](e2e.md#ci)). |
 | `playwright` | the compose stack | The Playwright journeys, after Tests ([End-to-end journeys](e2e.md#ci)). |
 
@@ -68,10 +68,9 @@ the one that matters most: without it act loads the project's `.env` into every 
 - **Token.** act has no GitHub token, so the actions call the GitHub API anonymously.
 - **Artifacts.** act 0.2.89's artifact server rejects the `mime_type` field current artifact clients
   send ([nektos/act#6114](https://github.com/nektos/act/issues/6114)). The upload steps of `panther`
-  and `playwright` are skipped under act (`!env.ACT`), and `docker/bake-action` logs
-  `unknown field "mime_type"` errors and a "Failed to CreateArtifact" warning when it uploads the
-  build record, without failing. Review screenshots from `make test-e2e` instead
-  ([End-to-end journeys](e2e.md#screenshots)).
+  and `playwright` are skipped under act (`!env.ACT`), and `DOCKER_BUILD_RECORD_UPLOAD: false` keeps
+  the Docker actions from uploading their build records. Review screenshots from `make test-e2e`
+  instead ([End-to-end journeys](e2e.md#screenshots)).
 
 ## Maintenance
 
@@ -83,6 +82,10 @@ Nothing updates these pins automatically:
 | `ACT_VERSION` | `.github/act/Dockerfile` | The latest act release. |
 | Compose `version` | `.github/workflows/ci.yaml`, `tests`, `panther` and `playwright` | A current Compose v5 release, the same in all three. |
 | `rhysd/actionlint:<version>` | `.github/act/run.sh` and `.github/workflows/ci.yaml` | The same release in both. |
+| supercronic release and checksums | `Dockerfile`, `supercronic_amd64` and `supercronic_arm64` | The latest release. Take each `sha256:` from the `digest` of its asset in the GitHub release. |
+
+Dependabot (`.github/dependabot.yml`) opens a pull request when a `FROM` image in `Dockerfile` gets a
+new digest or release. The digests keep the build cache valid between those pull requests.
 
 `make ci` rebuilds the runner image on every run, so a changed pin applies to the next run.
 

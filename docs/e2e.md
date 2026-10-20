@@ -315,7 +315,7 @@ running the one journey alone will not.
 ## CI
 
 The `panther` and `playwright` jobs run on pushes to `main` and on manual dispatch, after `tests`,
-not on pull requests, each with a 45 minute timeout. Each builds the images, starts the services,
+not on pull requests, each with a 45 minute timeout. Each builds the dev image, starts the services,
 runs `composer install` in `php`, compiles Tailwind, then runs `composer test:panther` or
 `composer test:playwright` in `php-e2e`. Unless the run was cancelled, it uploads its tree and its
 failure artifacts as one artifact, kept for 7 days:

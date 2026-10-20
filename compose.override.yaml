@@ -63,7 +63,7 @@ services:
   # Runs the whole e2e suite (make test-e2e) against its own app_e2e database;
   # https://localhost in here is this container's Caddy.
   php-e2e:
-    image: ${IMAGES_PREFIX:-}app-php-e2e
+    image: ${IMAGES_PREFIX:-}app-php-dev
     build:
       context: .
       target: frankenphp_dev
