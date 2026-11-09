@@ -1,16 +1,13 @@
 #syntax=docker/dockerfile:1
 
-# 1.13 is the first release with Mercure 1.0, which the Caddyfile `issuer` blocks need.
-FROM dunglas/frankenphp:1.13-php8.5-trixie@sha256:4a8eebee6b3bed92d01ffa6ec5b1bc2cb9c2ab7eeb546027a3f7e6a52937ebbb AS frankenphp_upstream
-
 # Static Go binary driving the `cron` compose service. A version bump changes both checksums.
 FROM scratch AS supercronic_amd64
-ADD --checksum=sha256:d2d7c97fbfefc763d5bbcbbb3f8d61f9dd3410ce5d05a737c414994b80b8cdd0 --chmod=755 \
-    https://github.com/aptible/supercronic/releases/download/v0.2.50/supercronic-linux-amd64 /supercronic
+ADD --checksum=sha256:cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123 --chmod=755 \
+    https://github.com/aptible/supercronic/releases/download/v0.2.51/supercronic-linux-amd64 /supercronic
 
 FROM scratch AS supercronic_arm64
-ADD --checksum=sha256:a1c0af9872e8de89a1ce5c1b596e26c42917d5a2cf914d98faee2e28156899e2 --chmod=755 \
-    https://github.com/aptible/supercronic/releases/download/v0.2.50/supercronic-linux-arm64 /supercronic
+ADD --checksum=sha256:4ae22576a78223d8ccdf5f3b3660a5cbb5288416bf0ca96afc4a36d195932b94 --chmod=755 \
+    https://github.com/aptible/supercronic/releases/download/v0.2.51/supercronic-linux-arm64 /supercronic
 
 FROM supercronic_${TARGETARCH} AS supercronic
 
@@ -21,7 +18,7 @@ COPY --link --from=supercronic /supercronic /usr/local/bin/supercronic
 COPY --link frankenphp/Caddyfile frankenphp/crontab /etc/frankenphp/
 
 # Base FrankenPHP image
-FROM frankenphp_upstream AS frankenphp_base
+FROM dunglas/frankenphp:1.13.4-php8.5-trixie AS frankenphp_base
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
