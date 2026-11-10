@@ -18,7 +18,7 @@ COPY --link --from=supercronic /supercronic /usr/local/bin/supercronic
 COPY --link frankenphp/Caddyfile frankenphp/crontab /etc/frankenphp/
 
 # Base FrankenPHP image
-FROM dunglas/frankenphp:1.13.4-php8.5-trixie AS frankenphp_base
+FROM dunglas/frankenphp:1.13.5-php8.5-trixie AS frankenphp_base
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
